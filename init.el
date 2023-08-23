@@ -62,7 +62,9 @@
 (setq dashboard-banner-logo-title "Personal Development Environment")
 (setq dashboard-startup-banner "~/.emacs.d/fuyuko.png" )
 (setq dashboard-center-content t)
-(setq dashboard-show-shortcuts nil)
+(setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
+(setq dashboard-show-shortcuts nil) 
+(setq dashboard-image-banner-max-height 200)
 (setq dashboard-items '((recents  . 5)
 			(bookmarks . 5)
 			(agenda . 5)
@@ -166,6 +168,8 @@
   "h"  '(helm-command-prefix :which-key "Helm"))
 
 (use-package elcord :ensure t)
+
+(use-package mpdel)
 
 (use-package lsp-mode
   :init
@@ -350,6 +354,20 @@
 
 (add-hook 'typescript-mode-hook #'lsp)
 
+(use-package lsp-java
+  :if (executable-find "mvn")
+  :init
+  :config (add-hook 'java-mode-hook 'lsp)
+  (use-package request :defer t)
+  :custom
+  (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/server/"))
+  (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/workspace/")))
+(require 'lsp-java-boot)
+(add-hook 'lsp-mode-hook #'lsp-lens-mode)
+(add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+(setq lsp-java-java-path
+      "/usr/lib/jvm/java-20-openjdk-amd64/bin/java")
+
 (use-package hydra)
 (use-package smerge-mode
   :config
@@ -417,6 +435,8 @@ _k_: down      _a_: combine       _q_: quit
 (neko/leader-keys
     "g" '(:ignore t :which-key "Git")
     "gs" '(open-magit-in-vertical-split :which-key "Magit"))
+
+(use-package jest)
 
 (use-package org
   :config

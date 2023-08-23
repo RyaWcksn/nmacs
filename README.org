@@ -140,7 +140,7 @@ Shell configuration using ZSH
 ** Icons
 ** Dashboard
 
-Startup page using Mugita Hikaru image as banner and show bunch of useful shortcuts!
+Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shortcuts!
 
 #+CAPTION: Fuyuko Mayuzumi
 [[./fuyuko.png]]
@@ -153,7 +153,9 @@ Startup page using Mugita Hikaru image as banner and show bunch of useful shortc
   (setq dashboard-banner-logo-title "Personal Development Environment")
   (setq dashboard-startup-banner "~/.emacs.d/fuyuko.png" )
   (setq dashboard-center-content t)
-  (setq dashboard-show-shortcuts nil)
+  (setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
+  (setq dashboard-show-shortcuts nil) 
+  (setq dashboard-image-banner-max-height 200)
   (setq dashboard-items '((recents  . 5)
 			  (bookmarks . 5)
 			  (agenda . 5)
@@ -357,6 +359,12 @@ Discord RCP client
 
 #+RESULTS:
 
+** MPDel
+#+begin_src emacs-lisp
+  (use-package mpdel) 
+#+end_src
+
+#+RESULTS:
 
 
 * Programming
@@ -635,6 +643,29 @@ Typescript mode
   (add-hook 'typescript-mode-hook #'lsp)
 #+end_src
 
+*** Java
+
+Java configuration for Spring boot etc
+
+#+begin_src emacs-lisp
+  (use-package lsp-java
+    :if (executable-find "mvn")
+    :init
+    :config (add-hook 'java-mode-hook 'lsp)
+    (use-package request :defer t)
+    :custom
+    (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/server/"))
+    (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/workspace/")))
+  (require 'lsp-java-boot)
+  (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+  (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+  (setq lsp-java-java-path
+	"/usr/lib/jvm/java-20-openjdk-amd64/bin/java")
+#+end_src
+
+#+RESULTS:
+: /usr/lib/jvm/java-20-openjdk-amd64/bin/java
+
 ** Smerge
 
 Merge make it easy with smerge-mode
@@ -728,6 +759,17 @@ Git inside emacs!
     (neko/leader-keys
         "g" '(:ignore t :which-key "Git")
         "gs" '(open-magit-in-vertical-split :which-key "Magit"))
+#+end_src
+
+#+RESULTS:
+
+** Tests
+*** Jest
+
+Used for jest unit test TS/JS
+
+#+begin_src emacs-lisp
+  (use-package jest)
 #+end_src
 
 #+RESULTS:
