@@ -66,7 +66,17 @@ Shell configuration using ZSH
 #+end_src
 
 
+
 * Display and look
+** Line number
+#+begin_src emacs-lisp
+  (display-line-numbers-mode)
+  (setq display-line-numbers 'relative) 
+#+end_src
+
+#+RESULTS:
+: relative
+
 ** Theme
 #+begin_src emacs-lisp
   (use-package dracula-theme)

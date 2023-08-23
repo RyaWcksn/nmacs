@@ -27,6 +27,9 @@
   (setq-local comint-process-echoes t))
 (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
 
+(display-line-numbers-mode)
+(setq display-line-numbers 'relative)
+
 (use-package dracula-theme)
 
 (defun single-font-size ()
