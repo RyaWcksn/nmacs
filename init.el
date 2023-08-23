@@ -65,11 +65,10 @@
 (setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
 (setq dashboard-show-shortcuts nil) 
 (setq dashboard-image-banner-max-height 200)
+(setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
 (setq dashboard-items '((recents  . 3)
-			(bookmarks . 3)
 			(projects . 3)
-			(agenda . 3)
-			(registers . 3)))
+			(agenda . 7)))
 
 (use-package all-the-icons
   :ensure t)

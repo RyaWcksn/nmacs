@@ -155,15 +155,14 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
   (setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
   (setq dashboard-show-shortcuts nil) 
   (setq dashboard-image-banner-max-height 200)
+  (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
   (setq dashboard-items '((recents  . 3)
-			  (bookmarks . 3)
 			  (projects . 3)
-			  (agenda . 3)
-			  (registers . 3)))
+			  (agenda . 7)))
 #+end_src
 
 #+RESULTS:
-: ((recents . 3) (bookmarks . 3) (projects . 3) (agenda . 3) (registers . 3))
+: ((recents . 3) (projects . 3) (agenda . 7))
 
 
 Language and all other icons pack
@@ -818,7 +817,7 @@ Org mode style writing
 #+end_src
 
 #+RESULTS:
-: ((~/Orgs/agenda.org :maxlevel . 3) (~/Orgs/someday.org :level . 1) (~/Orgs/tickler.org :maxlevel . 2))
+| sequence | TODO(t) | WAITING(n) |   |   | DONE(d) | CANCEL(c) |
 
 ** Org babel
 
@@ -836,7 +835,6 @@ Execute script inside org =#+begin_src lang=
 #+end_src
 
 #+RESULTS:
-
 
 
 ** Org bullet
