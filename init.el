@@ -13,8 +13,6 @@
 (setq use-package-always-ensure t)
 (setq package-enable-at-startup nil)
 
-(add-to-list 'image-types 'svg)
-
 (let ((path (shell-command-to-string ". ~/.zshrc; echo -n $PATH")))
   (setenv "PATH" path)
   (setq exec-path 
@@ -22,13 +20,22 @@
 	 (split-string-and-unquote path ":")
 	 exec-path)))
 
+(setq explicit-shell-file-name "/usr/bin/zsh")
+(setq shell-file-name "zsh")
+(setq explicit-zsh-args '("--login" "--interactive"))
+(defun zsh-shell-mode-setup ()
+  (setq-local comint-process-echoes t))
+(add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
+
+(use-package dracula-theme)
+
 (defun single-font-size ()
   "Reset all faces to the height of the default face."
   (dolist (f (face-list))
     (when (not (equal 'default f))
       (set-face-attribute f nil :height 1.0))))
 
-(load-theme 'tango-dark t)
+(load-theme 'dracula t)
 (add-hook 'after-init-hook
           'single-font-size)
 
@@ -36,6 +43,7 @@
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1))
+  (add-to-list 'image-types 'svg)
 
 (when (not (window-system))
   (menu-bar-mode -1))
@@ -92,6 +100,14 @@
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 (setq x-underline-at-descent-line t)
 
+(tab-bar-mode 1)                           ;; enable tab bar
+(setq tab-bar-show 1)                      ;; hide bar if <= 1 tabs open
+(setq tab-bar-close-button-show nil)       ;; hide tab close / X button
+(setq tab-bar-new-tab-choice "*dashboard*");; buffer to show in new tabs
+(setq tab-bar-tab-hints t)                 ;; show tab numbers
+(defun neko/current-tab-name ()
+  (alist-get 'name (tab-bar--current-tab)))
+
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -140,14 +156,30 @@
   (setq which-key-idle-delay 0.3)
   (which-key-mode 1))
 
+(use-package helm
+  :config
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  )
+
+(neko/leader-keys
+  "h"  '(helm-command-prefix :which-key "Helm"))
+
 (use-package elcord :ensure t)
 
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
+  (setq lsp-inlay-hints-enable t
+	lsp-inlay-hints-prefix " » "
+	lsp-inlay-hints-highlight   "#6B8E23")
+  (setq lsp-lens-enable t)
+  (setq lsp-ui-sideline-enable t)
+
+
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-	 (XXX-mode . lsp)
+	 ;;(XXX-mode . lsp)
 	 ;; if you want which-key integration
 	 (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
@@ -318,6 +350,74 @@
 
 (add-hook 'typescript-mode-hook #'lsp)
 
+(use-package hydra)
+(use-package smerge-mode
+  :config
+  (defhydra hydra-smerge (:color red :hint nil)
+    "
+Navigate       Keep               other
+----------------------------------------
+_j_: previous  _RET_: current       _e_: ediff
+_k_: next      _m_: mine  <<      _u_: undo
+_j_: up        _o_: other >>      _r_: refine
+_k_: down      _a_: combine       _q_: quit
+               _b_: base
+"
+    ("k" smerge-next)
+    ("j" smerge-prev)
+    ("RET" smerge-keep-current)
+    ("m" smerge-keep-mine)
+    ("o" smerge-keep-other)
+    ("b" smerge-keep-base)
+    ("a" smerge-keep-all)
+    ("e" smerge-ediff)
+    ("J" previous-line)
+    ("K" forward-line)
+    ("r" smerge-refine)
+    ("u" undo)
+    ("q" nil :exit t))
+
+  (defun enable-smerge-maybe ()
+    (when (and buffer-file-name (vc-backend buffer-file-name))
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^<<<<<<< " nil t)
+          (smerge-mode +1)
+          (hydra-smerge/body))))))
+
+
+(neko/leader-keys
+     "gm"  '(scimax-smerge/body :which-key "Toggle smerge")
+     )
+
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy)))
+  ;; NOounsTE: Set this to the folder where you keep your Git repos!
+
+  (neko/leader-keys
+     "p"  '(:ignore t :which-key "Projectile")
+     "pp" '(projectile-command-map :which-key "Command map")
+     "pf" '(projectile-find-file :which-key "Find File"))
+
+(use-package vterm
+    :ensure t)
+
+(use-package magit
+  :ensure t
+  :bind ("C-x g" . magit-status)
+  :custom
+  (magit-displey-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+(defun open-magit-in-vertical-split ()
+  (interactive)
+  (magit-status))
+
+(neko/leader-keys
+    "g" '(:ignore t :which-key "Git")
+    "gs" '(open-magit-in-vertical-split :which-key "Magit"))
+
 (use-package org
   :config
   (setq org-ellipsis " ...")
@@ -346,6 +446,9 @@
 			   ("~/Orgs/someday.org" :level . 1)
 			   ("~/Orgs/tickler.org" :maxlevel . 2)))
 
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAITING(n)" "|" "DONE(d)" "CANCEL(c)")))
+
 (setq org-babel-python-command "python3")
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -354,3 +457,73 @@
    (js . t)
    (latex . t)
    ))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+(defun neko/org-babel-tangle-config ()
+  (when (string-equal (buffer-file-name)
+		      (expand-file-name "~/.emacs.d/README.org"))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'neko/org-babel-tangle-config)))
+
+(use-package calfw :ensure t)
+(use-package calfw-org :ensure t)
+(require 'calfw-org)
+
+(use-package perspective
+  :bind
+  ("C-x k" . persp-kill-buffer*)         ; or use a nicer switcher, see below
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  :init
+  (persp-mode))
+
+
+(neko/leader-keys
+  "p"  '(:ignore t :which-key "Perspective")
+  "ps" '(persp-switch :which-key "Switch perspective")
+  "pm" '(persp-merge :which-key "Merge perspective")
+  "pb" '(persp-list-buffers :which-key "Buffers perspective")
+  )
+
+(neko/leader-keys
+  "]" '(persp-next :which-key "Next perspective")
+  "[" '(persp-prev :which-key "Prev perspective")
+  )
+
+(neko/leader-keys
+  "<left>" '(tab-bar-switch-to-prev-tab :which-key "Prev Tab")
+  "<right>" '(tab-bar-switch-to-next-tab :which-key "Next Tab")
+  "n" '(tab-bar-new-tab :which-key "New Tab")
+  "w"  '(:ignore t :which-key "Window")
+  "ws" '(evil-window-split :which-key "Split")
+  "wj" '(evil-window-down :which-key "Go Bottom")
+  "wk" '(evil-window-up :which-key "Go Top")
+  "wh" '(evil-window-left :which-key "Go Left")
+  "wl" '(evil-window-right :which-key "Go Right")
+  "wv" '(evil-window-vsplit :which-key "Vsplit")
+  "wq" '(delete-window :which-key "Quit")
+  "wb" '(switch-to-buffer :which-key "Switch Buffer"))
+
+(neko/leader-keys
+  ";" '(helm-M-x :which-key "Meta")
+  "/" '(comment-region :which-key "Comment region")
+  "s" '(evil-save :which-key "Save")
+  "b" '(:ignore t :which-key "Buffer")
+  "bb" '(counsel-switch-buffer :which-key "Switch buffer")
+  "bk" '(kill-buffer :which-key "Kill buffer")
+  "qq" '(kill-buffer-and-window :which-key "Kill buffer")
+  "ba" '(kill-other-buffers :which-key "Kill other buffer except this"))
+
+(neko/leader-keys
+  "o" '(:ignore t :which-key "Open")
+  "oa" '(org-agenda :which-key "Org Agenda")
+  "oc" '(cfw:open-org-calendar :which-key "Calendar")
+  "oe" '(neotree :which-key "Neotree")
+  "od" '(dired :which-key "Dired"))

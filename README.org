@@ -35,16 +35,6 @@ This config working on version emacs24
 #+end_src
 
 
-* Simple config
-
-#+begin_src emacs-lisp
-  (add-to-list 'image-types 'svg)
-#+end_src
-
-#+RESULTS:
-| svg | png | gif | tiff | jpeg | xpm | xbm | pbm |
-
-
 * Add PATH
 
 Adding =.zshrc= stuff as path
@@ -62,7 +52,28 @@ Adding =.zshrc= stuff as path
 | /home/aya/.sdkman/candidates/sbt/current/bin | /home/aya/.pyenv/shims | /home/aya/.pyenv/bin | /home/aya/.nvm/versions/node/v20.3.0/bin | /opt/apache-maven-3.9.2/bin | /home/aya/Android/platform-tools/ | /home/aya/Android/cmdline-tools//bin/ | /usr/local/opt/php@7.3/bin | /home/aya/.cargo/bin | /home/aya/.local/bin | /usr/local/sbin | /usr/local/bin | /usr/sbin | /usr/bin | /sbin | /bin | /usr/games | /usr/local/games | /snap/bin | /snap/bin | /home/aya/.local/share/coursier/bin | /usr/local/go/bin | /home/aya/go/bin | /opt/gradle/gradle-8.2.1/bin | /home/aya/.local/share/coursier/bin | /home/aya/flutter/bin | /home/aya/Clones/depot_tools | /home/aya/.cargo/bin | /home/aya/.local/bin | /usr/local/sbin | /usr/local/bin | /usr/sbin | /usr/bin | /sbin | /bin | /usr/games | /usr/local/games | /snap/bin | /snap/bin | /home/aya/.local/share/coursier/bin | /usr/local/libexec/emacs/30.0.50/x86_64-pc-linux-gnu |
 
 
+* Shell
+
+Shell configuration using ZSH
+
+#+begin_src emacs-lisp
+  (setq explicit-shell-file-name "/usr/bin/zsh")
+  (setq shell-file-name "zsh")
+  (setq explicit-zsh-args '("--login" "--interactive"))
+  (defun zsh-shell-mode-setup ()
+    (setq-local comint-process-echoes t))
+  (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
+#+end_src
+
+
 * Display and look
+** Theme
+#+begin_src emacs-lisp
+  (use-package dracula-theme)
+#+end_src
+
+#+RESULTS:
+
 ** Colorscheme
 
    #+name: look-and-feel
@@ -73,13 +84,14 @@ Adding =.zshrc= stuff as path
          (when (not (equal 'default f))
            (set-face-attribute f nil :height 1.0))))
 
-     (load-theme 'tango-dark t)
+     (load-theme 'dracula t)
      (add-hook 'after-init-hook
                'single-font-size)
 
    #+END_SRC
 
    #+RESULTS: look-and-feel
+   | org-persist-load-all | #[0 \300 \207 [dashboard-insert-startupify-lists] 1] | single-font-size | x-wm-set-size-hint | tramp-register-archive-autoload-file-name-handler | table--make-cell-map |
    
 ** Reduce clutter
 
@@ -93,6 +105,7 @@ Adding =.zshrc= stuff as path
        (tool-bar-mode -1)
        (menu-bar-mode -1)
        (scroll-bar-mode -1))
+       (add-to-list 'image-types 'svg)
    #+END_SRC
 
    When running emacs in a terminal, remove the menu bar.
@@ -208,6 +221,19 @@ Using neotree for folder tree management
 #+RESULTS:
 : t
 
+** Tabbar
+
+Tab bar configurations
+
+#+begin_src emacs-lisp
+  (tab-bar-mode 1)                           ;; enable tab bar
+  (setq tab-bar-show 1)                      ;; hide bar if <= 1 tabs open
+  (setq tab-bar-close-button-show nil)       ;; hide tab close / X button
+  (setq tab-bar-new-tab-choice "*dashboard*");; buffer to show in new tabs
+  (setq tab-bar-tab-hints t)                 ;; show tab numbers
+  (defun neko/current-tab-name ()
+    (alist-get 'name (tab-bar--current-tab)))
+#+end_src
 
 
 * Keyboard related stuffs
@@ -275,6 +301,9 @@ General keybind for emacs using =neko/leader-keys= to bind the keyboard combinat
   (define-key minibuffer-local-completion-map (kbd "SPC") 'self-insert-command)
 #+end_src
 
+#+RESULTS:
+: self-insert-command
+
 ** Hydra
 
 This is a package for GNU Emacs that can be used to tie related commands into a family of short bindings with a common prefix - a Hydra.
@@ -300,6 +329,24 @@ Key hints
 : t
 
 
+* Helm
+
+ Emacs framework for incremental completions and narrowing selections
+
+#+begin_src emacs-lisp
+  (use-package helm
+    :config
+    (global-set-key (kbd "M-x") #'helm-M-x)
+    (global-set-key (kbd "C-x C-f") #'helm-find-files)
+    )
+
+  (neko/leader-keys
+    "h"  '(helm-command-prefix :which-key "Helm"))
+#+end_src
+
+
+
+
 * Third party connection
 ** Elcord
 Discord RCP client
@@ -309,6 +356,7 @@ Discord RCP client
 #+end_src
 
 #+RESULTS:
+
 
 
 * Programming
@@ -321,8 +369,15 @@ LSP backend for every language i use
     :init
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
+    (setq lsp-inlay-hints-enable t
+	  lsp-inlay-hints-prefix " » "
+	  lsp-inlay-hints-highlight   "#6B8E23")
+    (setq lsp-lens-enable t)
+    (setq lsp-ui-sideline-enable t)
+
+
     :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-	   (XXX-mode . lsp)
+	   ;;(XXX-mode . lsp)
 	   ;; if you want which-key integration
 	   (lsp-mode . lsp-enable-which-key-integration))
     :commands lsp)
@@ -580,7 +635,102 @@ Typescript mode
   (add-hook 'typescript-mode-hook #'lsp)
 #+end_src
 
+** Smerge
 
+Merge make it easy with smerge-mode
+
+#+begin_src emacs-lisp
+  (use-package hydra)
+  (use-package smerge-mode
+    :config
+    (defhydra hydra-smerge (:color red :hint nil)
+      "
+  Navigate       Keep               other
+  ----------------------------------------
+  _j_: previous  _RET_: current       _e_: ediff
+  _k_: next      _m_: mine  <<      _u_: undo
+  _j_: up        _o_: other >>      _r_: refine
+  _k_: down      _a_: combine       _q_: quit
+                 _b_: base
+  "
+      ("k" smerge-next)
+      ("j" smerge-prev)
+      ("RET" smerge-keep-current)
+      ("m" smerge-keep-mine)
+      ("o" smerge-keep-other)
+      ("b" smerge-keep-base)
+      ("a" smerge-keep-all)
+      ("e" smerge-ediff)
+      ("J" previous-line)
+      ("K" forward-line)
+      ("r" smerge-refine)
+      ("u" undo)
+      ("q" nil :exit t))
+
+    (defun enable-smerge-maybe ()
+      (when (and buffer-file-name (vc-backend buffer-file-name))
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward "^<<<<<<< " nil t)
+            (smerge-mode +1)
+            (hydra-smerge/body))))))
+
+
+  (neko/leader-keys
+       "gm"  '(scimax-smerge/body :which-key "Toggle smerge")
+       )
+
+#+end_src
+
+** Projectile
+
+Project wide system management
+
+#+begin_src emacs-lisp
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy)))
+    ;; NOounsTE: Set this to the folder where you keep your Git repos!
+
+    (neko/leader-keys
+       "p"  '(:ignore t :which-key "Projectile")
+       "pp" '(projectile-command-map :which-key "Command map")
+       "pf" '(projectile-find-file :which-key "Find File"))
+#+end_src
+
+** VTerm
+
+Terminal emulator
+
+#+begin_src emacs-lisp
+  (use-package vterm
+      :ensure t)
+#+end_src
+
+#+RESULTS:
+
+** Magit
+
+Git inside emacs!
+
+#+begin_src emacs-lisp
+    (use-package magit
+      :ensure t
+      :bind ("C-x g" . magit-status)
+      :custom
+      (magit-displey-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+    (defun open-magit-in-vertical-split ()
+      (interactive)
+      (magit-status))
+
+    (neko/leader-keys
+        "g" '(:ignore t :which-key "Git")
+        "gs" '(open-magit-in-vertical-split :which-key "Magit"))
+#+end_src
+
+#+RESULTS:
 
 * Writing
 
@@ -619,6 +769,9 @@ Org mode style writing
 			     ("~/Orgs/someday.org" :level . 1)
 			     ("~/Orgs/tickler.org" :maxlevel . 2)))
 
+  (setq org-todo-keywords
+	'((sequence "TODO(t)" "WAITING(n)" "|" "DONE(d)" "CANCEL(c)")))
+
 #+end_src
 
 #+RESULTS:
@@ -642,3 +795,135 @@ Execute script inside org =#+begin_src lang=
 #+RESULTS:
 
 
+
+** Org bullet
+
+Beautify bulletpoint
+
+#+begin_src emacs-lisp
+  (use-package org-bullets
+    :after org
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+#+end_src
+
+** Org save tangle
+
+Auto tangle if saved
+
+#+begin_src emacs-lisp
+  (defun neko/org-babel-tangle-config ()
+    (when (string-equal (buffer-file-name)
+			(expand-file-name "~/.emacs.d/README.org"))
+      (let ((org-confirm-babel-evaluate nil))
+	(org-babel-tangle))))
+
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'neko/org-babel-tangle-config)))
+#+end_src
+
+#+RESULTS:
+| (lambda nil (add-hook 'after-save-hook #'neko/org-babel-tangle-config)) | nolinum | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] |
+
+** Calfw
+
+Beautiful calendar
+
+#+begin_src emacs-lisp
+  (use-package calfw :ensure t)
+  (use-package calfw-org :ensure t)
+  (require 'calfw-org)
+#+end_src
+
+
+* Workspace
+
+Workspaces related configuration
+
+** Prespective-el
+
+Prespective for each workspaces
+
+#+begin_src emacs-lisp
+  (use-package perspective
+    :bind
+    ("C-x k" . persp-kill-buffer*)         ; or use a nicer switcher, see below
+    :custom
+    (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+    :init
+    (persp-mode))
+
+
+  (neko/leader-keys
+    "p"  '(:ignore t :which-key "Perspective")
+    "ps" '(persp-switch :which-key "Switch perspective")
+    "pm" '(persp-merge :which-key "Merge perspective")
+    "pb" '(persp-list-buffers :which-key "Buffers perspective")
+    )
+
+  (neko/leader-keys
+    "]" '(persp-next :which-key "Next perspective")
+    "[" '(persp-prev :which-key "Prev perspective")
+    )
+
+#+end_src
+
+#+RESULTS:
+
+
+* Keybinding
+
+** Basic Keybinding
+
+*** Window keybind
+
+Window movement and management keybind
+
+#+begin_src emacs-lisp
+  (neko/leader-keys
+    "<left>" '(tab-bar-switch-to-prev-tab :which-key "Prev Tab")
+    "<right>" '(tab-bar-switch-to-next-tab :which-key "Next Tab")
+    "n" '(tab-bar-new-tab :which-key "New Tab")
+    "w"  '(:ignore t :which-key "Window")
+    "ws" '(evil-window-split :which-key "Split")
+    "wj" '(evil-window-down :which-key "Go Bottom")
+    "wk" '(evil-window-up :which-key "Go Top")
+    "wh" '(evil-window-left :which-key "Go Left")
+    "wl" '(evil-window-right :which-key "Go Right")
+    "wv" '(evil-window-vsplit :which-key "Vsplit")
+    "wq" '(delete-window :which-key "Quit")
+    "wb" '(switch-to-buffer :which-key "Switch Buffer")) 
+#+end_src
+
+#+RESULTS:
+
+*** General keybind
+
+Generic wide system keybinding
+
+#+begin_src emacs-lisp
+  (neko/leader-keys
+    ";" '(helm-M-x :which-key "Meta")
+    "/" '(comment-region :which-key "Comment region")
+    "s" '(evil-save :which-key "Save")
+    "b" '(:ignore t :which-key "Buffer")
+    "bb" '(counsel-switch-buffer :which-key "Switch buffer")
+    "bk" '(kill-buffer :which-key "Kill buffer")
+    "qq" '(kill-buffer-and-window :which-key "Kill buffer")
+    "ba" '(kill-other-buffers :which-key "Kill other buffer except this"))
+#+end_src
+
+#+RESULTS:
+
+*** Open keybind
+
+#+begin_src emacs-lisp
+  (neko/leader-keys
+    "o" '(:ignore t :which-key "Open")
+    "oa" '(org-agenda :which-key "Org Agenda")
+    "oc" '(cfw:open-org-calendar :which-key "Calendar")
+    "oe" '(neotree :which-key "Neotree")
+    "od" '(dired :which-key "Dired")) 
+#+end_src
+
+#+RESULTS:
