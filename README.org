@@ -91,7 +91,6 @@ Shell configuration using ZSH
    #+END_SRC
 
    #+RESULTS: look-and-feel
-   | org-persist-load-all | #[0 \300 \207 [dashboard-insert-startupify-lists] 1] | single-font-size | x-wm-set-size-hint | tramp-register-archive-autoload-file-name-handler | table--make-cell-map |
    
 ** Reduce clutter
 
@@ -102,10 +101,10 @@ Shell configuration using ZSH
    #+name: look-and-feel
    #+BEGIN_SRC emacs-lisp
      (when (window-system)
+       (add-to-list 'image-types 'svg)
        (tool-bar-mode -1)
        (menu-bar-mode -1)
        (scroll-bar-mode -1))
-       (add-to-list 'image-types 'svg)
    #+END_SRC
 
    When running emacs in a terminal, remove the menu bar.
@@ -773,6 +772,7 @@ Used for jest unit test TS/JS
 #+end_src
 
 #+RESULTS:
+
 
 * Writing
 
