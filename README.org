@@ -166,13 +166,13 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
   (setq dashboard-show-shortcuts nil) 
   (setq dashboard-image-banner-max-height 200)
   (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
-  (setq dashboard-items '((recents  . 3)
-			  (projects . 3)
+  (setq dashboard-items '((projects . 2)
+			  (bookmarks . 4)
 			  (agenda . 7)))
 #+end_src
 
 #+RESULTS:
-: ((recents . 3) (projects . 3) (agenda . 7))
+: ((projects . 2) (bookmarks . 4) (agenda . 7))
 
 
 Language and all other icons pack
@@ -610,6 +610,22 @@ Flycheck for go
 
 
 #+end_src
+
+GO tags, Gen test and doctor
+
+#+begin_src emacs-lisp
+  (use-package go-add-tags :ensure t)
+  (use-package go-gen-test :ensure t)
+  (use-package godoctor)
+#+end_src
+
+GO Snippets
+
+#+begin_src emacs-lisp
+  (use-package go-snippets)
+#+end_src
+
+#+RESULTS:
 
 
 *** Javascript

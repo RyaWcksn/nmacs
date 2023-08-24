@@ -69,8 +69,8 @@
 (setq dashboard-show-shortcuts nil) 
 (setq dashboard-image-banner-max-height 200)
 (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
-(setq dashboard-items '((recents  . 3)
-			(projects . 3)
+(setq dashboard-items '((projects . 2)
+			(bookmarks . 4)
 			(agenda . 7)))
 
 (use-package all-the-icons
@@ -336,6 +336,12 @@
 (setq my/config-path (my/get-config-path "src/config.json"))
 (setq flycheck-golangci-lint-config my/config-path)
 
+(use-package go-add-tags :ensure t)
+(use-package go-gen-test :ensure t)
+(use-package godoctor)
+
+(use-package go-snippets)
+
 (use-package rjsx-mode)
 (add-hook 'js-mode-hook #'lsp)
 
@@ -550,3 +556,23 @@ _k_: down      _a_: combine       _q_: quit
   "oc" '(cfw:open-org-calendar :which-key "Calendar")
   "oe" '(neotree :which-key "Neotree")
   "od" '(dired :which-key "Dired"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(helm-minibuffer-history-key "M-p")
+ '(package-selected-packages
+   '(go-snippets godoctor go-gen-test go-add-tags which-key vterm
+		 typescript-mode rjsx-mode react-snippets perspective
+		 org-bullets neotree mpdel magit lsp-ui lsp-java
+		 lsp-ivy jest helm-lsp go-mode general
+		 flycheck-golangci-lint evil-escape evil-collection
+		 elcord dracula-theme dashboard cyberpunk-theme
+		 company clipetty calfw-org calfw all-the-icons)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
