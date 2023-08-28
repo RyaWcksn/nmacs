@@ -70,8 +70,8 @@ Shell configuration using ZSH
 * Display and look
 ** Line number
 #+begin_src emacs-lisp
-  (display-line-numbers-mode)
-  (setq display-line-numbers 'relative) 
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (setq display-line-numbers-type 'relative)
 #+end_src
 
 #+RESULTS:
@@ -84,23 +84,27 @@ Shell configuration using ZSH
 
 #+RESULTS:
 
+** Font
+
+#+begin_src emacs-lisp
+  (add-to-list 'default-frame-alist
+             '(font . "JetBrains Mono-10"))
+#+end_src
+
+#+RESULTS:
+: ((font . JetBrains Mono-10) (tab-bar-lines . 1) (font . JetBrains Mono-14) (vertical-scroll-bars))
+
 ** Colorscheme
 
    #+name: look-and-feel
    #+BEGIN_SRC emacs-lisp
-     (defun single-font-size ()
-       "Reset all faces to the height of the default face."
-       (dolist (f (face-list))
-         (when (not (equal 'default f))
-           (set-face-attribute f nil :height 1.0))))
 
      (load-theme 'dracula t)
-     (add-hook 'after-init-hook
-               'single-font-size)
 
    #+END_SRC
 
    #+RESULTS: look-and-feel
+   : t
    
 ** Reduce clutter
 
@@ -245,6 +249,21 @@ Tab bar configurations
   (defun neko/current-tab-name ()
     (alist-get 'name (tab-bar--current-tab)))
 #+end_src
+
+** Backup
+#+begin_src emacs-lisp
+  (setq
+   backup-by-copying t      ; don't clobber symlinks
+   backup-directory-alist
+    '(("." . "~/.saves/"))    ; don't litter my fs tree
+   delete-old-versions t
+   kept-new-versions 6
+   kept-old-versions 2
+   version-control t)       ; use versioned backups
+#+end_src
+
+#+RESULTS:
+: t
 
 
 * Keyboard related stuffs
@@ -392,6 +411,27 @@ LSP backend for every language i use
     (setq lsp-lens-enable t)
     (setq lsp-ui-sideline-enable t)
 
+    :custom
+    (lsp-completion-show-detail t)
+    (lsp-completion-show-kind t)
+    (lsp-eldoc-enable-hover t)
+    (lsp-eldoc-render-all nil)
+    (lsp-enable-file-watchers t)
+    (lsp-enable-imenu t)
+    (lsp-enable-symbol-highlighting t)
+    (lsp-enable-xref t)
+    (lsp-headerline-breadcrumb-enable t)
+    (lsp-idle-delay 0.4)
+    (lsp-inlay-hint-enable t)
+    (lsp-lens-enable t)
+    (lsp-modeline-diagnostics-enable t)
+    (lsp-semantic-tokens-apply-modifiers t)
+    (lsp-semantic-tokens-enable t)
+    (lsp-semantic-tokens-warn-on-missing-face nil)
+    (lsp-signature-auto-activate t)
+    (lsp-signature-render-documentation t)
+
+
 
     :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
 	   ;;(XXX-mode . lsp)
@@ -426,14 +466,29 @@ LSP UI for more beautiful looks
 #+begin_src emacs-lisp
   (use-package lsp-ui
     :ensure t
+
+    :custom
+    (lsp-ui-doc-alignment 'window)
+    (lsp-ui-doc-delay 0.2)
+    (lsp-ui-doc-enable t)
+    (lsp-ui-doc-header nil)
+    (lsp-ui-doc-include-signature t)
+    (lsp-ui-doc-max-height 45)
+    (lsp-ui-doc-position 'at-point)
+    (lsp-ui-doc-show-with-cursor nil)
+    (lsp-ui-doc-show-with-mouse nil)
+    (lsp-ui-doc-use-webkit nil)
+    (lsp-ui-peek-always-show nil)
+    (lsp-ui-sideline-enable t)
+    (lsp-ui-sideline-show-code-actions t)
+    (lsp-ui-sideline-show-diagnostics t)
+    (lsp-ui-sideline-show-hover nil)
+
     :config
     (setq lsp-ui-sideline-ignore-duplicate t)
     (add-hook 'lsp-mode-hook 'lsp-ui-mode)
     )
 
-  (setq lsp-ui-doc-position 'at-point)
-  (setq lsp-completion-provider :none)
-  (setq lsp-ui-doc-show-with-cursor t)
 #+end_src
 
 #+RESULTS:
@@ -559,6 +614,10 @@ GO configuration language using =gopls=
 #+begin_src emacs-lisp
   (use-package go-mode
     :ensure t
+    :init
+    (with-eval-after-load 'projectile
+      (add-to-list 'projectile-project-root-files-bottom-up "go.mod")
+      (add-to-list 'projectile-project-root-files-bottom-up "go.sum"))
     :hook
     (
      (go-mode . lsp-deferred)
@@ -587,7 +646,11 @@ GO configuration language using =gopls=
 			    (flycheck-golangci-lint-setup)
 			    (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
 
+
 #+end_src
+
+#+RESULTS:
+| flycheck-golangci-lint-setup | (lambda nil (flycheck-golangci-lint-setup) (setq flycheck-local-checkers '((lsp (next-checkers golangci-lint))))) | yas-minor-mode | lsp-go-install-save-hooks | company-mode | lsp-deferred |
 
 Flycheck for go
 

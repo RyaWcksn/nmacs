@@ -27,20 +27,15 @@
   (setq-local comint-process-echoes t))
 (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
 
-(display-line-numbers-mode)
-(setq display-line-numbers 'relative)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(setq display-line-numbers-type 'relative)
 
 (use-package dracula-theme)
 
-(defun single-font-size ()
-  "Reset all faces to the height of the default face."
-  (dolist (f (face-list))
-    (when (not (equal 'default f))
-      (set-face-attribute f nil :height 1.0))))
+(add-to-list 'default-frame-alist
+           '(font . "JetBrains Mono-10"))
 
 (load-theme 'dracula t)
-(add-hook 'after-init-hook
-          'single-font-size)
 
 (when (window-system)
   (add-to-list 'image-types 'svg)
@@ -113,6 +108,15 @@
 (defun neko/current-tab-name ()
   (alist-get 'name (tab-bar--current-tab)))
 
+(setq
+ backup-by-copying t      ; don't clobber symlinks
+ backup-directory-alist
+  '(("." . "~/.saves/"))    ; don't litter my fs tree
+ delete-old-versions t
+ kept-new-versions 6
+ kept-old-versions 2
+ version-control t)       ; use versioned backups
+
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -184,6 +188,27 @@
   (setq lsp-lens-enable t)
   (setq lsp-ui-sideline-enable t)
 
+  :custom
+  (lsp-completion-show-detail t)
+  (lsp-completion-show-kind t)
+  (lsp-eldoc-enable-hover t)
+  (lsp-eldoc-render-all nil)
+  (lsp-enable-file-watchers t)
+  (lsp-enable-imenu t)
+  (lsp-enable-symbol-highlighting t)
+  (lsp-enable-xref t)
+  (lsp-headerline-breadcrumb-enable t)
+  (lsp-idle-delay 0.4)
+  (lsp-inlay-hint-enable t)
+  (lsp-lens-enable t)
+  (lsp-modeline-diagnostics-enable t)
+  (lsp-semantic-tokens-apply-modifiers t)
+  (lsp-semantic-tokens-enable t)
+  (lsp-semantic-tokens-warn-on-missing-face nil)
+  (lsp-signature-auto-activate t)
+  (lsp-signature-render-documentation t)
+
+
 
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
 	 ;;(XXX-mode . lsp)
@@ -209,14 +234,28 @@
 
 (use-package lsp-ui
   :ensure t
+
+  :custom
+  (lsp-ui-doc-alignment 'window)
+  (lsp-ui-doc-delay 0.2)
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-header nil)
+  (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-max-height 45)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-show-with-cursor nil)
+  (lsp-ui-doc-show-with-mouse nil)
+  (lsp-ui-doc-use-webkit nil)
+  (lsp-ui-peek-always-show nil)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-hover nil)
+
   :config
   (setq lsp-ui-sideline-ignore-duplicate t)
   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
   )
-
-(setq lsp-ui-doc-position 'at-point)
-(setq lsp-completion-provider :none)
-(setq lsp-ui-doc-show-with-cursor t)
 
 (neko/leader-keys
   "l"  '(:ignore t :which-key "LSP")
@@ -292,6 +331,10 @@
 
 (use-package go-mode
   :ensure t
+  :init
+  (with-eval-after-load 'projectile
+    (add-to-list 'projectile-project-root-files-bottom-up "go.mod")
+    (add-to-list 'projectile-project-root-files-bottom-up "go.sum"))
   :hook
   (
    (go-mode . lsp-deferred)
@@ -556,23 +599,3 @@ _k_: down      _a_: combine       _q_: quit
   "oc" '(cfw:open-org-calendar :which-key "Calendar")
   "oe" '(neotree :which-key "Neotree")
   "od" '(dired :which-key "Dired"))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(helm-minibuffer-history-key "M-p")
- '(package-selected-packages
-   '(go-snippets godoctor go-gen-test go-add-tags which-key vterm
-		 typescript-mode rjsx-mode react-snippets perspective
-		 org-bullets neotree mpdel magit lsp-ui lsp-java
-		 lsp-ivy jest helm-lsp go-mode general
-		 flycheck-golangci-lint evil-escape evil-collection
-		 elcord dracula-theme dashboard cyberpunk-theme
-		 company clipetty calfw-org calfw all-the-icons)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
