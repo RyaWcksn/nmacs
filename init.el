@@ -474,6 +474,22 @@ _k_: down      _a_: combine       _q_: quit
 (use-package vterm
     :ensure t)
 
+(defun vterm-split-window-below ()
+  (interactive)
+  (vterm)
+  (split-window-below -12)
+  (previous-buffer)
+  (other-window 1))
+
+(defun vterm-toggle ()
+  (interactive)
+  (if (eq major-mode 'vterm-mode)
+      (delete-window)
+    (vterm-split-window-below)))
+
+(neko/leader-keys
+  "ot" '(vterm-toggle :which-key "Open Vterm"))
+
 (use-package magit
   :ensure t
   :bind ("C-x g" . magit-status)

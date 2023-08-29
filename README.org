@@ -829,6 +829,28 @@ Terminal emulator
 
 #+RESULTS:
 
+Open at bottom
+
+#+begin_src emacs-lisp
+  (defun vterm-split-window-below ()
+    (interactive)
+    (vterm)
+    (split-window-below -12)
+    (previous-buffer)
+    (other-window 1))
+
+  (defun vterm-toggle ()
+    (interactive)
+    (if (eq major-mode 'vterm-mode)
+	(delete-window)
+      (vterm-split-window-below)))
+
+  (neko/leader-keys
+    "ot" '(vterm-toggle :which-key "Open Vterm"))
+#+end_src
+
+#+RESULTS:
+
 ** Magit
 
 Git inside emacs!
