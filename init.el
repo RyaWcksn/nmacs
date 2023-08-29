@@ -514,6 +514,15 @@ _k_: down      _a_: combine       _q_: quit
 (add-hook 'sql-mode-hook 'lsp)
 (setq lsp-sqls-workspace-config-path "~/.config/sqls/config.json")
 
+(use-package docker
+  :ensure t)
+
+(neko/leader-keys
+  "c"  '(:ignore t :which-key "Container")
+  "cd" '(docker-compose :which-key "Docker Compose")
+  "ci" '(docker-images :which-key "Docker Images")
+  )
+
 (use-package org
   :config
   (setq org-ellipsis " ...")
