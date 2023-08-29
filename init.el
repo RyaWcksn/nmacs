@@ -1,3 +1,5 @@
+(setq byte-compile-warnings '(cl-functions))
+
 (require 'package)
 (setq package-archives
       '(("melpa" . "https://melpa.org/packages/")

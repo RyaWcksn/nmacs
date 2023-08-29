@@ -15,6 +15,16 @@ Just directly clone this repo to =$HOME/.emacs.d/= folder and open your emacs~
 This config working on version emacs24
 
 
+* Simple config
+
+#+begin_src emacs-lisp
+  (setq byte-compile-warnings '(cl-functions))
+#+end_src
+
+#+RESULTS:
+| cl-functions |
+
+
 * Package Manager
 #+begin_src emacs-lisp :exports code
   (require 'package)
