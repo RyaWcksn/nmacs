@@ -243,8 +243,8 @@
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-max-height 45)
   (lsp-ui-doc-position 'at-point)
-  (lsp-ui-doc-show-with-cursor nil)
-  (lsp-ui-doc-show-with-mouse nil)
+  (lsp-ui-doc-show-with-cursor t)
+  (lsp-ui-doc-show-with-mouse t)
   (lsp-ui-doc-use-webkit nil)
   (lsp-ui-peek-always-show nil)
   (lsp-ui-sideline-enable t)
@@ -489,6 +489,14 @@ _k_: down      _a_: combine       _q_: quit
     "gs" '(open-magit-in-vertical-split :which-key "Magit"))
 
 (use-package jest)
+
+;; Install sqls
+(if nil (executable-find "sqls")
+    (shell-command "go install github.com/lighttiger2505/sqls@latest"))
+(if nil (file-directory-p "~/.config/sqls/config.json")
+  (shell-command "mkdir -p ~/.config/sqls && touch ~/.config/sqls/config.json"))
+(add-hook 'sql-mode-hook 'lsp)
+(setq lsp-sqls-workspace-config-path "~/.config/sqls/config.json")
 
 (use-package org
   :config
