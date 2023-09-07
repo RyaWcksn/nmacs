@@ -66,21 +66,18 @@
 (setq dashboard-show-shortcuts nil) 
 (setq dashboard-image-banner-max-height 200)
 (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
-(setq dashboard-items '((projects . 2)
-			(bookmarks . 4)
-			(agenda . 7)))
+(setq dashboard-items '((projects . 7)
+			(bookmarks . 3)
+			(agenda . 2)))
 
 (use-package all-the-icons
   :ensure t)
 
-(setq display-battery-mode 1)
+(setq display-battery-mode t)
+(setq display-time-mode t)
 (setq-default mode-line-format
 	      '("%e"
 		mode-line-front-space
-		mode-line-mule-info
-		mode-line-client
-		mode-line-modified
-		mode-line-remote
 		mode-line-frame-identification
 		mode-line-buffer-identification
 		" "
@@ -96,6 +93,7 @@
 		mode-line-misc-info
 		mode-line-end-spaces
 		))
+(setq mode-line-position (list "(%l,%c)"))
 
 (use-package neotree :ensure t)
 (setq neo-smart-open t)
@@ -119,6 +117,16 @@
  kept-old-versions 2
  version-control t)       ; use versioned backups
 
+(use-package smartparens
+  :config
+  (smartparens-global-mode 1))
+
+(require 'paren)
+(show-paren-mode t)
+(setq show-paren-delay 0)
+(set-face-attribute 'show-paren-match nil :background nil :underline t)
+(setq show-paren-style 'parenthesis) ; can be 'expression' 'parenthesis' and 'mixed'
+
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -135,12 +143,15 @@
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
+
 (use-package evil-escape
   :init
   (evil-escape-mode)
   :config
   (setq-default evil-escape-key-sequence "jk")
   )
+
+(evil-set-initial-state 'pdf-view-mode 'normal)
 
 (use-package evil-collection
   :ensure t
@@ -178,7 +189,20 @@
 
 (use-package elcord :ensure t)
 
-(use-package mpdel)
+(use-package emms
+  :config
+  (require 'emms-setup)
+  (require 'emms-player-mpd)
+  (emms-all)
+  (setq emms-player-list '(emms-player-mpd))
+  (setq emms-player-list '(emms-player-vlc)
+	emms-info-functions '(emms-info-native))
+  (add-to-list 'emms-info-functions 'emms-info-mpd)
+  (add-to-list 'emms-player-list 'emms-player-mpd)
+  (emms-player-mpd-connect)
+  (setq emms-player-mpd-server-name "localhost")
+  (setq emms-player-mpd-server-port "6600")
+  (setq emms-player-mpd-music-directory "~/Music/"))
 
 (use-package lsp-mode
   :init
@@ -469,9 +493,12 @@ _k_: down      _a_: combine       _q_: quit
   ;; NOounsTE: Set this to the folder where you keep your Git repos!
 
   (neko/leader-keys
-     "p"  '(:ignore t :which-key "Projectile")
-     "pp" '(projectile-command-map :which-key "Command map")
-     "pf" '(projectile-find-file :which-key "Find File"))
+     "f"  '(:ignore t :which-key "Projectile Find")
+     "fs" '(projectile-grep :which-key "Find String")
+     "fr" '(projectile-replace :which-key "Find Replace")
+     "fa" '(projectile-replace-regexp :which-key "Find Replace Project")
+     "ft" '(projectile-find-test-file :which-key "Find Tests")
+     "ff" '(projectile-find-file :which-key "Find File"))
 
 (use-package vterm
     :ensure t)
@@ -507,14 +534,6 @@ _k_: down      _a_: combine       _q_: quit
     "gs" '(open-magit-in-vertical-split :which-key "Magit"))
 
 (use-package jest)
-
-;; Install sqls
-(if nil (executable-find "sqls")
-    (shell-command "go install github.com/lighttiger2505/sqls@latest"))
-(if nil (file-directory-p "~/.config/sqls/config.json")
-  (shell-command "mkdir -p ~/.config/sqls && touch ~/.config/sqls/config.json"))
-(add-hook 'sql-mode-hook 'lsp)
-(setq lsp-sqls-workspace-config-path "~/.config/sqls/config.json")
 
 (use-package docker
   :ensure t)
@@ -556,6 +575,26 @@ _k_: down      _a_: combine       _q_: quit
 (setq org-todo-keywords
       '((sequence "TODO(t)" "WAITING(n)" "|" "DONE(d)" "CANCEL(c)")))
 
+(setq org-agenda-breadcrumbs-separator " ❱ "
+      org-agenda-current-time-string "⏰ ┈┈┈┈┈┈┈┈┈┈┈ now"
+      org-agenda-time-grid '((weekly today require-timed)
+			     (800 1000 1200 1400 1600 1800 2000)
+			     "---" "┈┈┈┈┈┈┈┈┈┈┈┈┈")
+      org-agenda-prefix-format '((agenda . "%i %-12:c%?-12t%b% s")
+				 (todo . " %i %-12:c")
+				 (tags . " %i %-12:c")
+				 (search . " %i %-12:c")))
+
+(setq org-agenda-format-date (lambda (date) (concat "\n" (make-string (window-width) 9472)
+						    "\n"
+						    (org-agenda-format-date-aligned date))))
+(setq org-cycle-separator-lines 2)
+(setq org-agenda-category-icon-alist
+      `(("Work" ,(list (all-the-icons-faicon "cogs")) nil nil :ascent center)
+	("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
+	("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
+	("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
+
 (setq org-babel-python-command "python3")
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -583,6 +622,15 @@ _k_: down      _a_: combine       _q_: quit
 (use-package calfw-org :ensure t)
 (require 'calfw-org)
 
+(use-package org-fragtog)
+
+(add-hook 'org-mode-hook
+	   'org-fragtog-mode)
+
+(setq org-startup-with-latex-preview t
+      org-format-latex-options (plist-put
+				org-format-latex-options :scale 3.0))
+
 (use-package perspective
   :bind
   ("C-x k" . persp-kill-buffer*)         ; or use a nicer switcher, see below
@@ -597,6 +645,7 @@ _k_: down      _a_: combine       _q_: quit
   "ps" '(persp-switch :which-key "Switch perspective")
   "pm" '(persp-merge :which-key "Merge perspective")
   "pb" '(persp-list-buffers :which-key "Buffers perspective")
+  "pk" '(persp-kill :which-key "Kill perspective")
   )
 
 (neko/leader-keys

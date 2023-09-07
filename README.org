@@ -180,13 +180,13 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
   (setq dashboard-show-shortcuts nil) 
   (setq dashboard-image-banner-max-height 200)
   (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
-  (setq dashboard-items '((projects . 2)
-			  (bookmarks . 4)
-			  (agenda . 7)))
+  (setq dashboard-items '((projects . 7)
+			  (bookmarks . 3)
+			  (agenda . 2)))
 #+end_src
 
 #+RESULTS:
-: ((projects . 2) (bookmarks . 4) (agenda . 7))
+: ((projects . 7) (bookmarks . 3) (agenda . 2))
 
 
 Language and all other icons pack
@@ -203,14 +203,11 @@ Language and all other icons pack
 Modeline using vanilla emacs with only limited info that i really need
 
 #+begin_src emacs-lisp
-  (setq display-battery-mode 1)
+  (setq display-battery-mode t)
+  (setq display-time-mode t)
   (setq-default mode-line-format
 		'("%e"
 		  mode-line-front-space
-		  mode-line-mule-info
-		  mode-line-client
-		  mode-line-modified
-		  mode-line-remote
 		  mode-line-frame-identification
 		  mode-line-buffer-identification
 		  " "
@@ -226,11 +223,12 @@ Modeline using vanilla emacs with only limited info that i really need
 		  mode-line-misc-info
 		  mode-line-end-spaces
 		  ))
+  (setq mode-line-position (list "(%l,%c)"))
 
 #+end_src
 
 #+RESULTS:
-| %e | mode-line-front-space | mode-line-mule-info | mode-line-client | mode-line-modified | mode-line-remote | mode-line-frame-identification | mode-line-buffer-identification |   | mode-line-position | evil-mode-line-tag | (:eval (if vc-mode (let* ((noback (replace-regexp-in-string (format ^ %s (vc-backend buffer-file-name))   vc-mode)) (face (cond ((string-match ^ - noback) 'mode-line-vc) ((string-match ^ [:@] noback) 'mode-line-vc-edit) ((string-match ^ [!\?] noback) 'mode-line-vc-modified)))) (format  %s (substring noback 2))))) |   | mode-line-misc-info | mode-line-end-spaces |
+| (%l,%c) |
 
 ** Neotree (Filetree)
 
@@ -275,6 +273,30 @@ Tab bar configurations
 #+RESULTS:
 : t
 
+** Parenthesis
+
+All parenthesis config here
+
+#+begin_src emacs-lisp
+  (use-package smartparens
+    :config
+    (smartparens-global-mode 1))
+#+end_src
+
+#+RESULTS:
+: t
+
+#+begin_src emacs-lisp
+  (require 'paren)
+  (show-paren-mode t)
+  (setq show-paren-delay 0)
+  (set-face-attribute 'show-paren-match nil :background nil :underline t)
+  (setq show-paren-style 'parenthesis) ; can be 'expression' 'parenthesis' and 'mixed'
+#+end_src
+
+#+RESULTS:
+: parenthesis
+
 
 * Keyboard related stuffs
 ** Evil mode
@@ -298,6 +320,7 @@ Evil binding! for those who come from VIM
 
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
+
   (use-package evil-escape
     :init
     (evil-escape-mode)
@@ -305,10 +328,12 @@ Evil binding! for those who come from VIM
     (setq-default evil-escape-key-sequence "jk")
     )
 
+  (evil-set-initial-state 'pdf-view-mode 'normal)
+
 #+end_src
 
 #+RESULTS:
-: t
+| pdf-view-mode | dashboard-mode | messages-buffer-mode | emms-playlist-mode | emms-stream-mode | emms-metaplaylist-mode | tar-mode | archive-mode | arc-mode | git-commit-mode | magit-gitflow-mode | magit-blob-mode | magit-status-mode | magit-stashes-mode | magit-stash-mode | magit-revision-mode | magit-refs-mode | magit-reflog-mode | magit-process-mode | magit-log-select-mode | magit-log-mode | magit-diff-mode | magit-cherry-mode | magit-mode | git-rebase-mode | magit-submodule-list-mode | magit-repolist-mode | view-mode | edebug-mode | debugger-mode | eww-bookmark-mode | eww-buffers-mode | eww-history-mode | eww-mode | gnus-summary-mode | gnus-server-mode | gnus-group-mode | gnus-browse-mode | gnus-bookmark-bmenu-mode | gnus-article-mode | doc-view-mode | vc-git-log-view-mode | calendar-mode | ibuffer-mode | diff-mode | Custom-mode | lsp-ui-imenu-mode | flycheck-error-list-mode | xref--transient-buffer-mode | xref--xref-buffer-mode | outline-mode | compilation-mode | mpdel-playlist-stored-playlist-mode | mpdel-playlist-current-playlist-mode | mpdel-browser-mode | mpdel-song-mode | mpdel-playlist-mode | bookmark-bmenu-mode | tabulated-list-mode | tab-switcher-mode | occur-mode | package-menu-mode | neotree-mode | Info-mode | image-mode | help-mode | emacs-lisp-mode | Buffer-menu-mode |
 
 ** Evil keybind collection
 
@@ -389,6 +414,7 @@ Key hints
 
 * Third party connection
 ** Elcord
+
 Discord RCP client
 
 #+begin_src emacs-lisp
@@ -397,12 +423,29 @@ Discord RCP client
 
 #+RESULTS:
 
-** MPDel
+** EMMS
+
+Multimedia for emacs
+
 #+begin_src emacs-lisp
-  (use-package mpdel) 
+  (use-package emms
+    :config
+    (require 'emms-setup)
+    (require 'emms-player-mpd)
+    (emms-all)
+    (setq emms-player-list '(emms-player-mpd))
+    (setq emms-player-list '(emms-player-vlc)
+	  emms-info-functions '(emms-info-native))
+    (add-to-list 'emms-info-functions 'emms-info-mpd)
+    (add-to-list 'emms-player-list 'emms-player-mpd)
+    (emms-player-mpd-connect)
+    (setq emms-player-mpd-server-name "localhost")
+    (setq emms-player-mpd-server-port "6600")
+    (setq emms-player-mpd-music-directory "~/Music/"))
 #+end_src
 
 #+RESULTS:
+: t
 
 
 * Programming
@@ -823,10 +866,15 @@ Project wide system management
     ;; NOounsTE: Set this to the folder where you keep your Git repos!
 
     (neko/leader-keys
-       "p"  '(:ignore t :which-key "Projectile")
-       "pp" '(projectile-command-map :which-key "Command map")
-       "pf" '(projectile-find-file :which-key "Find File"))
+       "f"  '(:ignore t :which-key "Projectile Find")
+       "fs" '(projectile-grep :which-key "Find String")
+       "fr" '(projectile-replace :which-key "Find Replace")
+       "fa" '(projectile-replace-regexp :which-key "Find Replace Project")
+       "ft" '(projectile-find-test-file :which-key "Find Tests")
+       "ff" '(projectile-find-file :which-key "Find File"))
 #+end_src
+
+#+RESULTS:
 
 ** VTerm
 
@@ -894,25 +942,6 @@ Used for jest unit test TS/JS
 
 #+RESULTS:
 
-** Database
-
-Database client inside this config
-
-*** SQL
-
-#+begin_src emacs-lisp
-    ;; Install sqls
-    (if nil (executable-find "sqls")
-	(shell-command "go install github.com/lighttiger2505/sqls@latest"))
-    (if nil (file-directory-p "~/.config/sqls/config.json")
-      (shell-command "mkdir -p ~/.config/sqls && touch ~/.config/sqls/config.json"))
-    (add-hook 'sql-mode-hook 'lsp)
-    (setq lsp-sqls-workspace-config-path "~/.config/sqls/config.json")
-#+end_src
-
-#+RESULTS:
-: ~/.config/sqls/config.json
-
 ** Container
 
 Container Docker config
@@ -976,6 +1005,34 @@ Org mode style writing
 #+RESULTS:
 | sequence | TODO(t) | WAITING(n) |   |   | DONE(d) | CANCEL(c) |
 
+#+begin_src emacs-lisp
+  (setq org-agenda-breadcrumbs-separator " ❱ "
+	org-agenda-current-time-string "⏰ ┈┈┈┈┈┈┈┈┈┈┈ now"
+	org-agenda-time-grid '((weekly today require-timed)
+			       (800 1000 1200 1400 1600 1800 2000)
+			       "---" "┈┈┈┈┈┈┈┈┈┈┈┈┈")
+	org-agenda-prefix-format '((agenda . "%i %-12:c%?-12t%b% s")
+				   (todo . " %i %-12:c")
+				   (tags . " %i %-12:c")
+				   (search . " %i %-12:c")))
+
+  (setq org-agenda-format-date (lambda (date) (concat "\n" (make-string (window-width) 9472)
+						      "\n"
+						      (org-agenda-format-date-aligned date))))
+  (setq org-cycle-separator-lines 2)
+  (setq org-agenda-category-icon-alist
+	`(("Work" ,(list (all-the-icons-faicon "cogs")) nil nil :ascent center)
+	  ("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
+	  ("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
+	  ("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
+#+end_src
+
+#+RESULTS:
+| Work     | () | nil | nil | :ascent | center |
+| Personal | () | nil | nil | :ascent | center |
+| Calendar | () | nil | nil | :ascent | center |
+| Reading  | () | nil | nil | :ascent | center |
+
 ** Org babel
 
 Execute script inside org =#+begin_src lang=
@@ -992,7 +1049,6 @@ Execute script inside org =#+begin_src lang=
 #+end_src
 
 #+RESULTS:
-
 
 ** Org bullet
 
@@ -1033,6 +1089,33 @@ Beautiful calendar
   (require 'calfw-org)
 #+end_src
 
+** LaTeX
+
+All latex retaled writing stuffs
+
+#+begin_src emacs-lisp
+  (use-package org-fragtog)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook
+	     'org-fragtog-mode)
+#+end_src
+
+#+RESULTS:
+| org-fragtog-mode | (lambda nil (add-hook 'after-save-hook #'neko/org-babel-tangle-config)) | org-bullets-mode | nolinum | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] |
+
+#+begin_src emacs-lisp
+  (setq org-startup-with-latex-preview t
+	org-format-latex-options (plist-put
+				  org-format-latex-options :scale 3.0))
+#+end_src
+
+#+RESULTS:
+| :foreground | default | :background | default | :scale | 3.0 | :html-foreground | Black | :html-background | Transparent | :html-scale | 1.0 | :matchers | (begin $1 $ $$ \( \[) |
+
 
 * Workspace
 
@@ -1057,6 +1140,7 @@ Prespective for each workspaces
     "ps" '(persp-switch :which-key "Switch perspective")
     "pm" '(persp-merge :which-key "Merge perspective")
     "pb" '(persp-list-buffers :which-key "Buffers perspective")
+    "pk" '(persp-kill :which-key "Kill perspective")
     )
 
   (neko/leader-keys
@@ -1125,3 +1209,8 @@ Generic wide system keybinding
 #+end_src
 
 #+RESULTS:
+
+
+
+If $a^2=b$ and \( b=2 \), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
