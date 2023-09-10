@@ -159,6 +159,14 @@
   :config
   (evil-collection-init))
 
+(use-package undo-tree
+  :ensure t
+  :after evil
+  :diminish
+  :config
+  (evil-set-undo-system 'undo-tree)
+  (global-undo-tree-mode 1))
+
 (use-package general
   :ensure t)
   :config
@@ -187,7 +195,11 @@
 (neko/leader-keys
   "h"  '(helm-command-prefix :which-key "Helm"))
 
-(use-package elcord :ensure t)
+(use-package elcord :ensure t
+  :config
+  (setq elcord-display-line-numbers nil)
+  (setq elcord-editor-icon "Emacs (Material)")
+  )
 
 (use-package emms
   :config
@@ -204,6 +216,9 @@
   (setq emms-player-mpd-server-port "6600")
   (setq emms-player-mpd-music-directory "~/Music/"))
 
+(use-package company-tabnine)
+(add-to-list 'company-backends #'company-tabnine)
+
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
@@ -215,6 +230,7 @@
   (setq lsp-ui-sideline-enable t)
 
   :custom
+  (lsp-completion-provider :none) 
   (lsp-completion-show-detail t)
   (lsp-completion-show-kind t)
   (lsp-eldoc-enable-hover t)
@@ -352,8 +368,10 @@
 (use-package yasnippet :ensure t
   :config
   ;; (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets/yasnippet-golang/")
-  (yas-global-mode 1)
-  )
+  (setq yas-snippet-dirs
+	'("~/.emacs.d/snippets"))
+	(yas-global-mode 1)
+	)
 
 (use-package go-mode
   :ensure t
@@ -594,6 +612,11 @@ _k_: down      _a_: combine       _q_: quit
 	("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
 	("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
 	("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
+
+(require 'color)
+(set-face-attribute 'org-block nil :background
+		    (color-darken-name
+		     (face-attribute 'default :background) 3))
 
 (setq org-babel-python-command "python3")
 (org-babel-do-load-languages

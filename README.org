@@ -350,6 +350,23 @@ Evil binding collection to match with evil mode
 #+RESULTS:
 : t
 
+** Undo
+
+Undo and redo functionality
+
+#+begin_src emacs-lisp
+  (use-package undo-tree
+    :ensure t
+    :after evil
+    :diminish
+    :config
+    (evil-set-undo-system 'undo-tree)
+    (global-undo-tree-mode 1))
+#+end_src
+
+#+RESULTS:
+: t
+
 ** General keybind
 
 General keybind for emacs using =neko/leader-keys= to bind the keyboard combination
@@ -418,10 +435,15 @@ Key hints
 Discord RCP client
 
 #+begin_src emacs-lisp
-  (use-package elcord :ensure t)
+  (use-package elcord :ensure t
+    :config
+    (setq elcord-display-line-numbers nil)
+    (setq elcord-editor-icon "Emacs (Material)")
+    )
 #+end_src
 
 #+RESULTS:
+: t
 
 ** EMMS
 
@@ -447,6 +469,18 @@ Multimedia for emacs
 #+RESULTS:
 : t
 
+** Tabnine
+
+AI powered stuffs
+
+#+begin_src emacs-lisp
+  (use-package company-tabnine)
+  (add-to-list 'company-backends #'company-tabnine)
+#+end_src
+
+#+RESULTS:
+| company-tabnine | (company-capf company-yasnippet) |
+
 
 * Programming
 ** LSP Mode
@@ -465,6 +499,7 @@ LSP backend for every language i use
     (setq lsp-ui-sideline-enable t)
 
     :custom
+    (lsp-completion-provider :none) 
     (lsp-completion-show-detail t)
     (lsp-completion-show-kind t)
     (lsp-eldoc-enable-hover t)
@@ -652,12 +687,17 @@ Snippets for emacs
   (use-package yasnippet :ensure t
     :config
     ;; (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets/yasnippet-golang/")
-    (yas-global-mode 1)
-    )
+    (setq yas-snippet-dirs
+	  '("~/.emacs.d/snippets"))
+	  (yas-global-mode 1)
+	  )
 #+end_src
 
 #+RESULTS:
 : t
+
+
+#+RESULTS:
 
 ** Languages
 *** GO
@@ -1033,6 +1073,18 @@ Org mode style writing
 | Calendar | () | nil | nil | :ascent | center |
 | Reading  | () | nil | nil | :ascent | center |
 
+
+Codeblock colors
+
+#+begin_src emacs-lisp
+  (require 'color)
+  (set-face-attribute 'org-block nil :background
+		      (color-darken-name
+		       (face-attribute 'default :background) 3))
+#+end_src
+
+#+RESULTS:
+
 ** Org babel
 
 Execute script inside org =#+begin_src lang=
@@ -1107,7 +1159,7 @@ All latex retaled writing stuffs
 #+RESULTS:
 | org-fragtog-mode | (lambda nil (add-hook 'after-save-hook #'neko/org-babel-tangle-config)) | org-bullets-mode | nolinum | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] |
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :exports results 
   (setq org-startup-with-latex-preview t
 	org-format-latex-options (plist-put
 				  org-format-latex-options :scale 3.0))
@@ -1214,3 +1266,6 @@ Generic wide system keybinding
 
 If $a^2=b$ and \( b=2 \), then the solution must be
 either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+
+
+
