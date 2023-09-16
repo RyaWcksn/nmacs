@@ -34,10 +34,12 @@
 
 (use-package dracula-theme)
 
+(use-package atom-one-dark-theme)
+
 (add-to-list 'default-frame-alist
            '(font . "JetBrains Mono-10"))
 
-(load-theme 'dracula t)
+(load-theme 'atom-one-dark t)
 
 (when (window-system)
   (add-to-list 'image-types 'svg)
@@ -166,6 +168,7 @@
   :config
   (evil-set-undo-system 'undo-tree)
   (global-undo-tree-mode 1))
+(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 
 (use-package general
   :ensure t)
@@ -217,7 +220,7 @@
   (setq emms-player-mpd-music-directory "~/Music/"))
 
 (use-package company-tabnine)
-(add-to-list 'company-backends #'company-tabnine)
+(setq company-backends '(company-tabnine))
 
 (use-package lsp-mode
   :init
@@ -625,6 +628,7 @@ _k_: down      _a_: combine       _q_: quit
    (shell . t)
    (js . t)
    (latex . t)
+   (calc . t)
    ))
 
 (use-package org-bullets
@@ -641,8 +645,25 @@ _k_: down      _a_: combine       _q_: quit
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'neko/org-babel-tangle-config)))
 
-(use-package calfw :ensure t)
-(use-package calfw-org :ensure t)
+(use-package calfw :ensure t
+  :config
+  (setq cfw:face-item-separator-color nil
+	cfw:render-line-breaker 'cfw:render-line-breaker-none
+	cfw:fchar-junction ?╋
+	cfw:fchar-vertical-line ?┃
+	cfw:fchar-horizontal-line ?━
+	cfw:fchar-left-junction ?┣
+	cfw:fchar-right-junction ?┫
+	cfw:fchar-top-junction ?┯
+	cfw:fchar-top-left-corner ?┏
+	cfw:fchar-top-right-corner ?┓)
+  )
+(use-package calfw-org :ensure t
+  :commands (cfw:open-org-calendar
+	     cfw:org-create-source
+	     cfw:org-create-file-source
+	     cfw:open-org-calendar-withkevin)
+  )
 (require 'calfw-org)
 
 (use-package org-fragtog)

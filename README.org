@@ -94,6 +94,12 @@ Shell configuration using ZSH
 
 #+RESULTS:
 
+#+begin_src emacs-lisp
+  (use-package atom-one-dark-theme)
+#+end_src
+
+#+RESULTS:
+
 ** Font
 
 #+begin_src emacs-lisp
@@ -109,7 +115,7 @@ Shell configuration using ZSH
    #+name: look-and-feel
    #+BEGIN_SRC emacs-lisp
 
-     (load-theme 'dracula t)
+     (load-theme 'atom-one-dark t)
 
    #+END_SRC
 
@@ -362,10 +368,12 @@ Undo and redo functionality
     :config
     (evil-set-undo-system 'undo-tree)
     (global-undo-tree-mode 1))
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+
 #+end_src
 
 #+RESULTS:
-: t
+: ((. . ~/.emacs.d/undo))
 
 ** General keybind
 
@@ -475,11 +483,11 @@ AI powered stuffs
 
 #+begin_src emacs-lisp
   (use-package company-tabnine)
-  (add-to-list 'company-backends #'company-tabnine)
+  (setq company-backends '(company-tabnine))
 #+end_src
 
 #+RESULTS:
-| company-tabnine | (company-capf company-yasnippet) |
+| company-tabnine |
 
 
 * Programming
@@ -1097,6 +1105,7 @@ Execute script inside org =#+begin_src lang=
      (shell . t)
      (js . t)
      (latex . t)
+     (calc . t)
      ))
 #+end_src
 
@@ -1136,10 +1145,30 @@ Auto tangle if saved
 Beautiful calendar
 
 #+begin_src emacs-lisp
-  (use-package calfw :ensure t)
-  (use-package calfw-org :ensure t)
+  (use-package calfw :ensure t
+    :config
+    (setq cfw:face-item-separator-color nil
+	  cfw:render-line-breaker 'cfw:render-line-breaker-none
+	  cfw:fchar-junction ?╋
+	  cfw:fchar-vertical-line ?┃
+	  cfw:fchar-horizontal-line ?━
+	  cfw:fchar-left-junction ?┣
+	  cfw:fchar-right-junction ?┫
+	  cfw:fchar-top-junction ?┯
+	  cfw:fchar-top-left-corner ?┏
+	  cfw:fchar-top-right-corner ?┓)
+    )
+  (use-package calfw-org :ensure t
+    :commands (cfw:open-org-calendar
+	       cfw:org-create-source
+	       cfw:org-create-file-source
+	       cfw:open-org-calendar-withkevin)
+    )
   (require 'calfw-org)
 #+end_src
+
+#+RESULTS:
+: calfw-org
 
 ** LaTeX
 
