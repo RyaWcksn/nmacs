@@ -491,6 +491,19 @@ AI powered stuffs
 
 
 * Programming
+** Treesitter
+Highlighting for emacs
+
+#+begin_src emacs-lisp
+  (use-package tree-sitter)
+  (use-package tree-sitter-langs)
+  (global-tree-sitter-mode)
+
+#+end_src
+
+#+RESULTS:
+: t
+
 ** LSP Mode
 
 LSP backend for every language i use
@@ -791,6 +804,18 @@ GO Snippets
 
 #+RESULTS:
 
+Go treesitter
+
+#+begin_src emacs-lisp
+  (add-to-list 'tree-sitter-major-mode-language-alist
+	       '(go-mode . go))
+
+  ;; Hook Tree-sitter mode into your major modes
+  (add-hook 'go-mode-hook #'tree-sitter-hl-mode)
+#+end_src
+
+#+RESULTS:
+| tree-sitter-hl-mode | flycheck-golangci-lint-setup | (lambda nil (flycheck-golangci-lint-setup) (setq flycheck-local-checkers '((lsp (next-checkers golangci-lint))))) | yas-minor-mode | lsp-go-install-save-hooks | company-mode | lsp-deferred |
 
 *** Javascript
 **** RJSX
@@ -854,6 +879,18 @@ Java configuration for Spring boot etc
 
 #+RESULTS:
 : /usr/lib/jvm/java-20-openjdk-amd64/bin/java
+
+*** Yaml
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :mode "\\.ya?ml\\'")
+  (add-hook 'yaml-mode-hook
+	    (lambda ()
+	      (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
+#+end_src
+
+#+RESULTS:
+| (lambda nil (define-key yaml-mode-map  'newline-and-indent)) | evil-collection-yaml-mode-set-evil-shift-width | yaml-set-imenu-generic-expression | lsp |
 
 ** Smerge
 
@@ -1003,6 +1040,18 @@ Container Docker config
     "cd" '(docker-compose :which-key "Docker Compose")
     "ci" '(docker-images :which-key "Docker Images")
     )
+#+end_src
+
+#+RESULTS:
+
+** Kubernetes
+#+begin_src emacs-lisp
+  (use-package kubernetes
+    :ensure t
+    :commands (kubernetes-overview)
+    :config
+    (setq kubernetes-poll-frequency 3600
+	  kubernetes-redraw-frequency 3600))
 #+end_src
 
 #+RESULTS:

@@ -222,6 +222,10 @@
 (use-package company-tabnine)
 (setq company-backends '(company-tabnine))
 
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(global-tree-sitter-mode)
+
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
@@ -432,6 +436,12 @@
 
 (use-package go-snippets)
 
+(add-to-list 'tree-sitter-major-mode-language-alist
+	     '(go-mode . go))
+
+;; Hook Tree-sitter mode into your major modes
+(add-hook 'go-mode-hook #'tree-sitter-hl-mode)
+
 (use-package rjsx-mode)
 (add-hook 'js-mode-hook #'lsp)
 
@@ -466,6 +476,12 @@
 (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
 (setq lsp-java-java-path
       "/usr/lib/jvm/java-20-openjdk-amd64/bin/java")
+
+(use-package yaml-mode
+  :mode "\\.ya?ml\\'")
+(add-hook 'yaml-mode-hook
+	  (lambda ()
+	    (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
 
 (use-package hydra)
 (use-package smerge-mode
@@ -564,6 +580,13 @@ _k_: down      _a_: combine       _q_: quit
   "cd" '(docker-compose :which-key "Docker Compose")
   "ci" '(docker-images :which-key "Docker Images")
   )
+
+(use-package kubernetes
+  :ensure t
+  :commands (kubernetes-overview)
+  :config
+  (setq kubernetes-poll-frequency 3600
+	kubernetes-redraw-frequency 3600))
 
 (use-package org
   :config
