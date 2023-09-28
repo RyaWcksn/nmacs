@@ -22,8 +22,6 @@ This config working on version emacs24
 #+end_src
 
 #+RESULTS:
-| cl-functions |
-
 
 * Package Manager
 #+begin_src emacs-lisp :exports code
@@ -41,7 +39,6 @@ This config working on version emacs24
   (require 'use-package)
   (setq use-package-always-ensure t)
   (setq package-enable-at-startup nil)
-
 #+end_src
 
 
@@ -103,12 +100,14 @@ Shell configuration using ZSH
 ** Font
 
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist
-             '(font . "JetBrains Mono-10"))
+  (set-frame-font "JetBrains Mono 10" nil t)
+  (add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
+
+  ;;
+
 #+end_src
 
 #+RESULTS:
-: ((font . JetBrains Mono-10) (tab-bar-lines . 1) (font . JetBrains Mono-14) (vertical-scroll-bars))
 
 ** Colorscheme
 
@@ -120,7 +119,7 @@ Shell configuration using ZSH
    #+END_SRC
 
    #+RESULTS: look-and-feel
-   : t
+   : right
    
 ** Reduce clutter
 
@@ -134,7 +133,7 @@ Shell configuration using ZSH
        (add-to-list 'image-types 'svg)
        (tool-bar-mode -1)
        (menu-bar-mode -1)
-       (scroll-bar-mode -1))
+       (scroll-bar-mode 1))
    #+END_SRC
 
    When running emacs in a terminal, remove the menu bar.
@@ -142,6 +141,7 @@ Shell configuration using ZSH
    #+NAME: look-and-feel
    #+BEGIN_SRC emacs-lisp
      (when (not (window-system))
+       (tool-bar-mode -1)
        (menu-bar-mode -1))
    #+END_SRC
    
@@ -189,10 +189,11 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
   (setq dashboard-items '((projects . 7)
 			  (bookmarks . 3)
 			  (agenda . 2)))
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+end_src
 
 #+RESULTS:
-: ((projects . 7) (bookmarks . 3) (agenda . 2))
+| lambda | nil | (get-buffer *dashboard*) |
 
 
 Language and all other icons pack
@@ -468,7 +469,6 @@ Multimedia for emacs
 	  emms-info-functions '(emms-info-native))
     (add-to-list 'emms-info-functions 'emms-info-mpd)
     (add-to-list 'emms-player-list 'emms-player-mpd)
-    (emms-player-mpd-connect)
     (setq emms-player-mpd-server-name "localhost")
     (setq emms-player-mpd-server-port "6600")
     (setq emms-player-mpd-music-directory "~/Music/"))
@@ -1044,7 +1044,10 @@ Container Docker config
 
 #+RESULTS:
 
-** Kubernetes
+*** Kubernetes
+
+Kubernetes setups
+
 #+begin_src emacs-lisp
   (use-package kubernetes
     :ensure t
@@ -1055,6 +1058,17 @@ Container Docker config
 #+end_src
 
 #+RESULTS:
+
+K8s Setup
+
+#+begin_src emacs-lisp
+  (use-package k8s-mode
+    :ensure t
+    :hook (k8s-mode . yas-minor-mode))
+#+end_src
+
+#+RESULTS:
+| yas-minor-mode |
 
 
 * Writing

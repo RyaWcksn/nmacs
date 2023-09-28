@@ -36,8 +36,10 @@
 
 (use-package atom-one-dark-theme)
 
-(add-to-list 'default-frame-alist
-           '(font . "JetBrains Mono-10"))
+(set-frame-font "JetBrains Mono 10" nil t)
+(add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
+
+;;
 
 (load-theme 'atom-one-dark t)
 
@@ -45,9 +47,10 @@
   (add-to-list 'image-types 'svg)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
-  (scroll-bar-mode -1))
+  (scroll-bar-mode 1))
 
 (when (not (window-system))
+  (tool-bar-mode -1)
   (menu-bar-mode -1))
 
 ;; Y/N
@@ -71,6 +74,7 @@
 (setq dashboard-items '((projects . 7)
 			(bookmarks . 3)
 			(agenda . 2)))
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
 (use-package all-the-icons
   :ensure t)
@@ -214,7 +218,6 @@
 	emms-info-functions '(emms-info-native))
   (add-to-list 'emms-info-functions 'emms-info-mpd)
   (add-to-list 'emms-player-list 'emms-player-mpd)
-  (emms-player-mpd-connect)
   (setq emms-player-mpd-server-name "localhost")
   (setq emms-player-mpd-server-port "6600")
   (setq emms-player-mpd-music-directory "~/Music/"))
@@ -587,6 +590,10 @@ _k_: down      _a_: combine       _q_: quit
   :config
   (setq kubernetes-poll-frequency 3600
 	kubernetes-redraw-frequency 3600))
+
+(use-package k8s-mode
+  :ensure t
+  :hook (k8s-mode . yas-minor-mode))
 
 (use-package org
   :config
