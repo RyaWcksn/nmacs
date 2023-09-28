@@ -35,6 +35,14 @@
 
 (use-package dracula-theme)
 
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-tokyo-night t))
+
 (use-package atom-one-dark-theme)
 
 (set-frame-font "JetBrains Mono 10" nil t)
@@ -42,17 +50,54 @@
 
 ;;
 
-(load-theme 'atom-one-dark t)
+(dolist (char/ligature-re
+	 `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
+	   (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
+	   (?*  . ,(rx (or (or "*>" "*/") (+ "*"))))
+	   (?<  . ,(rx (or (or "<<=" "<<-" "<|||" "<==>" "<!--" "<=>" "<||" "<|>" "<-<"
+			       "<==" "<=<" "<-|" "<~>" "<=|" "<~~" "<$>" "<+>" "</>"
+			       "<*>" "<->" "<=" "<|" "<:" "<>"  "<$" "<-" "<~" "<+"
+			       "</" "<*")
+			   (+ "<"))))
+	   (?:  . ,(rx (or (or ":?>" "::=" ":>" ":<" ":?" ":=") (+ ":"))))
+	   (?=  . ,(rx (or (or "=>>" "==>" "=/=" "=!=" "=>" "=:=") (+ "="))))
+	   (?!  . ,(rx (or (or "!==" "!=") (+ "!"))))
+	   (?>  . ,(rx (or (or ">>-" ">>=" ">=>" ">]" ">:" ">-" ">=") (+ ">"))))
+	   (?&  . ,(rx (+ "&")))
+	   (?|  . ,(rx (or (or "|->" "|||>" "||>" "|=>" "||-" "||=" "|-" "|>"
+			       "|]" "|}" "|=")
+			   (+ "|"))))
+	   (?.  . ,(rx (or (or ".?" ".=" ".-" "..<") (+ "."))))
+	   (?+  . ,(rx (or "+>" (+ "+"))))
+	   (?\[ . ,(rx (or "[<" "[|")))
+	   (?\{ . ,(rx "{|"))
+	   (?\? . ,(rx (or (or "?." "?=" "?:") (+ "?"))))
+	   (?#  . ,(rx (or (or "#_(" "#[" "#{" "#=" "#!" "#:" "#_" "#?" "#(")
+			   (+ "#"))))
+	   (?\; . ,(rx (+ ";")))
+	   (?_  . ,(rx (or "_|_" "__")))
+	   (?~  . ,(rx (or "~~>" "~~" "~>" "~-" "~@")))
+	   (?$  . ,(rx "$>"))
+	   (?^  . ,(rx "^="))
+	   (?\] . ,(rx "]#"))))
+  (let ((char (car char/ligature-re))
+	(ligature-re (cdr char/ligature-re)))
+    (set-char-table-range composition-function-table char
+			  `([,ligature-re 0 font-shape-gstring]))))
 
 (when (window-system)
   (add-to-list 'image-types 'svg)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
+  (load-theme 'atom-one-dark t)
   (scroll-bar-mode 1))
 
 (when (not (window-system))
   (tool-bar-mode -1)
   (menu-bar-mode -1))
+
+(if (daemonp)
+  (load-theme 'atom-one-dark t))
 
 ;; Y/N
 (defalias 'yes-or-no-p 'y-or-n-p)
@@ -139,7 +184,8 @@
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
+  (setq evil-want-C-i-jump t)
+  (setq evil-want-Y-yank-to-eol 1)
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
@@ -159,6 +205,11 @@
   )
 
 (evil-set-initial-state 'pdf-view-mode 'normal)
+
+(evil-define-key 'normal 'lsp-ui-doc-mode
+  [?K] #'lsp-ui-doc-focus-frame)
+(evil-define-key 'normal 'lsp-ui-doc-frame-mode
+  [?q] #'lsp-ui-doc-unfocus-frame)
 
 (use-package evil-collection
   :ensure t
@@ -292,23 +343,40 @@
   (lsp-ui-doc-alignment 'window)
   (lsp-ui-doc-delay 0.2)
   (lsp-ui-doc-enable t)
-  (lsp-ui-doc-header nil)
+  (lsp-ui-doc-header t)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-max-height 45)
   (lsp-ui-doc-position 'at-point)
   (lsp-ui-doc-show-with-cursor t)
-  (lsp-ui-doc-show-with-mouse t)
+  (lsp-ui-doc-show-with-mouse nil)
   (lsp-ui-doc-use-webkit nil)
   (lsp-ui-peek-always-show nil)
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-code-actions t)
   (lsp-ui-sideline-show-diagnostics t)
-  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-show-hover t)
 
   :config
   (setq lsp-ui-sideline-ignore-duplicate t)
   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
   )
+
+(defun my/lsp-ui-doc-scroll-up ()
+  "Scroll up inside LSP UI documentation frame."
+  (interactive)
+  (scroll-up-command))
+
+(defun my/lsp-ui-doc-scroll-down ()
+  "Scroll down inside LSP UI documentation frame."
+  (interactive)
+  (scroll-down-command))
+
+(defun my/setup-lsp-ui-doc-scroll-keys ()
+  "Set up custom scroll keys for LSP UI documentation frame."
+  (local-set-key (kbd "j") 'my/lsp-ui-doc-scroll-down)
+  (local-set-key (kbd "k") 'my/lsp-ui-doc-scroll-up))
+
+(add-hook 'lsp-ui-doc-frame-mode-hook 'my/setup-lsp-ui-doc-scroll-keys)
 
 (neko/leader-keys
   "l"  '(:ignore t :which-key "LSP")
@@ -596,6 +664,22 @@ _k_: down      _a_: combine       _q_: quit
   :ensure t
   :hook (k8s-mode . yas-minor-mode))
 
+(use-package blamer
+  :ensure t
+  :bind (("s-i" . blamer-show-commit-info)
+	 ("C-c i" . blamer-show-posframe-commit-info))
+  :defer 20
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 70)
+  :custom-face
+  (blamer-face ((t :foreground "#7a88cf"
+		   :background nil
+		   :height 100
+		   :italic t)))
+  :config
+  (global-blamer-mode 1))
+
 (use-package org
   :config
   (setq org-ellipsis " ...")
@@ -646,11 +730,6 @@ _k_: down      _a_: combine       _q_: quit
 	("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
 	("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
 	("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
-
-(require 'color)
-(set-face-attribute 'org-block nil :background
-		    (color-darken-name
-		     (face-attribute 'default :background) 3))
 
 (setq org-babel-python-command "python3")
 (org-babel-do-load-languages
@@ -728,6 +807,9 @@ _k_: down      _a_: combine       _q_: quit
   "[" '(persp-prev :which-key "Prev perspective")
   )
 
+(defun reload-dotemacs ()
+  (interactive)
+  (load-file "~/.emacs.d/init.el"))
 (neko/leader-keys
   "<left>" '(tab-bar-switch-to-prev-tab :which-key "Prev Tab")
   "<right>" '(tab-bar-switch-to-next-tab :which-key "Next Tab")
@@ -740,6 +822,7 @@ _k_: down      _a_: combine       _q_: quit
   "wl" '(evil-window-right :which-key "Go Right")
   "wv" '(evil-window-vsplit :which-key "Vsplit")
   "wq" '(delete-window :which-key "Quit")
+  "wr" '(reload-dotemacs :which-key "Reload")
   "wb" '(switch-to-buffer :which-key "Switch Buffer"))
 
 (neko/leader-keys

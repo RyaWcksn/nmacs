@@ -14,7 +14,6 @@ Just directly clone this repo to =$HOME/.emacs.d/= folder and open your emacs~
 
 This config working on version emacs24
 
-
 * Simple config
 
 #+begin_src emacs-lisp
@@ -42,7 +41,6 @@ This config working on version emacs24
   (setq package-enable-at-startup nil)
 #+end_src
 
-
 * Add PATH
 
 Adding =.zshrc= stuff as path
@@ -59,7 +57,6 @@ Adding =.zshrc= stuff as path
 #+RESULTS:
 | /home/aya/.sdkman/candidates/sbt/current/bin | /home/aya/.pyenv/shims | /home/aya/.pyenv/bin | /home/aya/.nvm/versions/node/v20.3.0/bin | /opt/apache-maven-3.9.2/bin | /home/aya/Android/platform-tools/ | /home/aya/Android/cmdline-tools//bin/ | /usr/local/opt/php@7.3/bin | /home/aya/.cargo/bin | /home/aya/.local/bin | /usr/local/sbin | /usr/local/bin | /usr/sbin | /usr/bin | /sbin | /bin | /usr/games | /usr/local/games | /snap/bin | /snap/bin | /home/aya/.local/share/coursier/bin | /usr/local/go/bin | /home/aya/go/bin | /opt/gradle/gradle-8.2.1/bin | /home/aya/.local/share/coursier/bin | /home/aya/flutter/bin | /home/aya/Clones/depot_tools | /home/aya/.cargo/bin | /home/aya/.local/bin | /usr/local/sbin | /usr/local/bin | /usr/sbin | /usr/bin | /sbin | /bin | /usr/games | /usr/local/games | /snap/bin | /snap/bin | /home/aya/.local/share/coursier/bin | /usr/local/libexec/emacs/30.0.50/x86_64-pc-linux-gnu |
 
-
 * Shell
 
 Shell configuration using ZSH
@@ -72,8 +69,6 @@ Shell configuration using ZSH
     (setq-local comint-process-echoes t))
   (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
 #+end_src
-
-
 
 * Display and look
 ** Line number
@@ -90,7 +85,18 @@ Shell configuration using ZSH
   (use-package dracula-theme)
 #+end_src
 
+#+begin_src emacs-lisp
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-tokyo-night t))
+#+end_src
+
 #+RESULTS:
+: t
 
 #+begin_src emacs-lisp
   (use-package atom-one-dark-theme)
@@ -110,18 +116,49 @@ Shell configuration using ZSH
 
 #+RESULTS:
 
-** Colorscheme
+** Lignature
 
-   #+name: look-and-feel
-   #+BEGIN_SRC emacs-lisp
+Show programming lignature
 
-     (load-theme 'atom-one-dark t)
+#+begin_src emacs-lisp
+  (dolist (char/ligature-re
+	   `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
+	     (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
+	     (?*  . ,(rx (or (or "*>" "*/") (+ "*"))))
+	     (?<  . ,(rx (or (or "<<=" "<<-" "<|||" "<==>" "<!--" "<=>" "<||" "<|>" "<-<"
+				 "<==" "<=<" "<-|" "<~>" "<=|" "<~~" "<$>" "<+>" "</>"
+				 "<*>" "<->" "<=" "<|" "<:" "<>"  "<$" "<-" "<~" "<+"
+				 "</" "<*")
+			     (+ "<"))))
+	     (?:  . ,(rx (or (or ":?>" "::=" ":>" ":<" ":?" ":=") (+ ":"))))
+	     (?=  . ,(rx (or (or "=>>" "==>" "=/=" "=!=" "=>" "=:=") (+ "="))))
+	     (?!  . ,(rx (or (or "!==" "!=") (+ "!"))))
+	     (?>  . ,(rx (or (or ">>-" ">>=" ">=>" ">]" ">:" ">-" ">=") (+ ">"))))
+	     (?&  . ,(rx (+ "&")))
+	     (?|  . ,(rx (or (or "|->" "|||>" "||>" "|=>" "||-" "||=" "|-" "|>"
+				 "|]" "|}" "|=")
+			     (+ "|"))))
+	     (?.  . ,(rx (or (or ".?" ".=" ".-" "..<") (+ "."))))
+	     (?+  . ,(rx (or "+>" (+ "+"))))
+	     (?\[ . ,(rx (or "[<" "[|")))
+	     (?\{ . ,(rx "{|"))
+	     (?\? . ,(rx (or (or "?." "?=" "?:") (+ "?"))))
+	     (?#  . ,(rx (or (or "#_(" "#[" "#{" "#=" "#!" "#:" "#_" "#?" "#(")
+			     (+ "#"))))
+	     (?\; . ,(rx (+ ";")))
+	     (?_  . ,(rx (or "_|_" "__")))
+	     (?~  . ,(rx (or "~~>" "~~" "~>" "~-" "~@")))
+	     (?$  . ,(rx "$>"))
+	     (?^  . ,(rx "^="))
+	     (?\] . ,(rx "]#"))))
+    (let ((char (car char/ligature-re))
+	  (ligature-re (cdr char/ligature-re)))
+      (set-char-table-range composition-function-table char
+			    `([,ligature-re 0 font-shape-gstring]))))
+#+end_src
 
-   #+END_SRC
+#+RESULTS:
 
-   #+RESULTS: look-and-feel
-   : right
-   
 ** Reduce clutter
 
    Remove the toolbar. It's ugly and I never use it. Also remove the
@@ -134,6 +171,7 @@ Shell configuration using ZSH
        (add-to-list 'image-types 'svg)
        (tool-bar-mode -1)
        (menu-bar-mode -1)
+       (load-theme 'atom-one-dark t)
        (scroll-bar-mode 1))
    #+END_SRC
 
@@ -145,7 +183,15 @@ Shell configuration using ZSH
        (tool-bar-mode -1)
        (menu-bar-mode -1))
    #+END_SRC
-   
+
+   #+begin_src emacs-lisp
+     (if (daemonp)
+       (load-theme 'atom-one-dark t))
+   #+end_src
+
+   #+RESULTS:
+   : t
+
 ** Basic functionality
 
    Default of yes or no to y n p
@@ -305,7 +351,6 @@ All parenthesis config here
 #+RESULTS:
 : parenthesis
 
-
 * Keyboard related stuffs
 ** Evil mode
 
@@ -317,7 +362,8 @@ Evil binding! for those who come from VIM
     (setq evil-want-integration t)
     (setq evil-want-keybinding nil)
     (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
+    (setq evil-want-C-i-jump t)
+    (setq evil-want-Y-yank-to-eol 1)
     :config
     (evil-mode 1)
     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
@@ -338,10 +384,14 @@ Evil binding! for those who come from VIM
 
   (evil-set-initial-state 'pdf-view-mode 'normal)
 
+  (evil-define-key 'normal 'lsp-ui-doc-mode
+    [?K] #'lsp-ui-doc-focus-frame)
+  (evil-define-key 'normal 'lsp-ui-doc-frame-mode
+    [?q] #'lsp-ui-doc-unfocus-frame)
+
 #+end_src
 
 #+RESULTS:
-| pdf-view-mode | dashboard-mode | messages-buffer-mode | emms-playlist-mode | emms-stream-mode | emms-metaplaylist-mode | tar-mode | archive-mode | arc-mode | git-commit-mode | magit-gitflow-mode | magit-blob-mode | magit-status-mode | magit-stashes-mode | magit-stash-mode | magit-revision-mode | magit-refs-mode | magit-reflog-mode | magit-process-mode | magit-log-select-mode | magit-log-mode | magit-diff-mode | magit-cherry-mode | magit-mode | git-rebase-mode | magit-submodule-list-mode | magit-repolist-mode | view-mode | edebug-mode | debugger-mode | eww-bookmark-mode | eww-buffers-mode | eww-history-mode | eww-mode | gnus-summary-mode | gnus-server-mode | gnus-group-mode | gnus-browse-mode | gnus-bookmark-bmenu-mode | gnus-article-mode | doc-view-mode | vc-git-log-view-mode | calendar-mode | ibuffer-mode | diff-mode | Custom-mode | lsp-ui-imenu-mode | flycheck-error-list-mode | xref--transient-buffer-mode | xref--xref-buffer-mode | outline-mode | compilation-mode | mpdel-playlist-stored-playlist-mode | mpdel-playlist-current-playlist-mode | mpdel-browser-mode | mpdel-song-mode | mpdel-playlist-mode | bookmark-bmenu-mode | tabulated-list-mode | tab-switcher-mode | occur-mode | package-menu-mode | neotree-mode | Info-mode | image-mode | help-mode | emacs-lisp-mode | Buffer-menu-mode |
 
 ** Evil keybind collection
 
@@ -420,7 +470,6 @@ Key hints
 #+RESULTS:
 : t
 
-
 * Helm
 
  Emacs framework for incremental completions and narrowing selections
@@ -435,9 +484,6 @@ Key hints
   (neko/leader-keys
     "h"  '(helm-command-prefix :which-key "Helm"))
 #+end_src
-
-
-
 
 * Third party connection
 ** Elcord
@@ -489,7 +535,6 @@ AI powered stuffs
 
 #+RESULTS:
 | company-tabnine |
-
 
 * Programming
 ** Treesitter
@@ -581,28 +626,45 @@ LSP UI for more beautiful looks
     (lsp-ui-doc-alignment 'window)
     (lsp-ui-doc-delay 0.2)
     (lsp-ui-doc-enable t)
-    (lsp-ui-doc-header nil)
+    (lsp-ui-doc-header t)
     (lsp-ui-doc-include-signature t)
     (lsp-ui-doc-max-height 45)
     (lsp-ui-doc-position 'at-point)
     (lsp-ui-doc-show-with-cursor t)
-    (lsp-ui-doc-show-with-mouse t)
+    (lsp-ui-doc-show-with-mouse nil)
     (lsp-ui-doc-use-webkit nil)
     (lsp-ui-peek-always-show nil)
     (lsp-ui-sideline-enable t)
     (lsp-ui-sideline-show-code-actions t)
     (lsp-ui-sideline-show-diagnostics t)
-    (lsp-ui-sideline-show-hover nil)
+    (lsp-ui-sideline-show-hover t)
 
     :config
     (setq lsp-ui-sideline-ignore-duplicate t)
     (add-hook 'lsp-mode-hook 'lsp-ui-mode)
     )
 
+  (defun my/lsp-ui-doc-scroll-up ()
+    "Scroll up inside LSP UI documentation frame."
+    (interactive)
+    (scroll-up-command))
+
+  (defun my/lsp-ui-doc-scroll-down ()
+    "Scroll down inside LSP UI documentation frame."
+    (interactive)
+    (scroll-down-command))
+
+  (defun my/setup-lsp-ui-doc-scroll-keys ()
+    "Set up custom scroll keys for LSP UI documentation frame."
+    (local-set-key (kbd "j") 'my/lsp-ui-doc-scroll-down)
+    (local-set-key (kbd "k") 'my/lsp-ui-doc-scroll-up))
+
+  (add-hook 'lsp-ui-doc-frame-mode-hook 'my/setup-lsp-ui-doc-scroll-keys)
+
 #+end_src
 
 #+RESULTS:
-: t
+| my/setup-lsp-ui-doc-scroll-keys |
 
 ** LSP Mapping
 
@@ -1071,6 +1133,30 @@ K8s Setup
 #+RESULTS:
 | yas-minor-mode |
 
+** Blamer
+
+Blamer
+
+#+begin_src emacs-lisp
+  (use-package blamer
+    :ensure t
+    :bind (("s-i" . blamer-show-commit-info)
+	   ("C-c i" . blamer-show-posframe-commit-info))
+    :defer 20
+    :custom
+    (blamer-idle-time 0.3)
+    (blamer-min-offset 70)
+    :custom-face
+    (blamer-face ((t :foreground "#7a88cf"
+		     :background nil
+		     :height 100
+		     :italic t)))
+    :config
+    (global-blamer-mode 1))
+#+end_src
+
+#+RESULTS:
+: blamer-show-posframe-commit-info
 
 * Writing
 
@@ -1145,17 +1231,6 @@ Org mode style writing
 | Calendar | () | nil | nil | :ascent | center |
 | Reading  | () | nil | nil | :ascent | center |
 
-
-Codeblock colors
-
-#+begin_src emacs-lisp
-  (require 'color)
-  (set-face-attribute 'org-block nil :background
-		      (color-darken-name
-		       (face-attribute 'default :background) 3))
-#+end_src
-
-#+RESULTS:
 
 ** Org babel
 
@@ -1261,7 +1336,6 @@ All latex retaled writing stuffs
 #+RESULTS:
 | :foreground | default | :background | default | :scale | 3.0 | :html-foreground | Black | :html-background | Transparent | :html-scale | 1.0 | :matchers | (begin $1 $ $$ \( \[) |
 
-
 * Workspace
 
 Workspaces related configuration
@@ -1297,7 +1371,6 @@ Prespective for each workspaces
 
 #+RESULTS:
 
-
 * Keybinding
 
 ** Basic Keybinding
@@ -1307,6 +1380,9 @@ Prespective for each workspaces
 Window movement and management keybind
 
 #+begin_src emacs-lisp
+  (defun reload-dotemacs ()
+    (interactive)
+    (load-file "~/.emacs.d/init.el"))
   (neko/leader-keys
     "<left>" '(tab-bar-switch-to-prev-tab :which-key "Prev Tab")
     "<right>" '(tab-bar-switch-to-next-tab :which-key "Next Tab")
@@ -1319,7 +1395,9 @@ Window movement and management keybind
     "wl" '(evil-window-right :which-key "Go Right")
     "wv" '(evil-window-vsplit :which-key "Vsplit")
     "wq" '(delete-window :which-key "Quit")
+    "wr" '(reload-dotemacs :which-key "Reload")
     "wb" '(switch-to-buffer :which-key "Switch Buffer")) 
+
 #+end_src
 
 #+RESULTS:
