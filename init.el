@@ -1,4 +1,5 @@
 (setq byte-compile-warnings '(cl-functions))
+(global-auto-revert-mode t)
 
 (require 'package)
 (setq package-archives
@@ -594,41 +595,6 @@ _k_: down      _a_: combine       _q_: quit
 (use-package k8s-mode
   :ensure t
   :hook (k8s-mode . yas-minor-mode))
-
-(dolist (char/ligature-re
-	 `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
-	   (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
-	   (?*  . ,(rx (or (or "*>" "*/") (+ "*"))))
-	   (?<  . ,(rx (or (or "<<=" "<<-" "<|||" "<==>" "<!--" "<=>" "<||" "<|>" "<-<"
-			       "<==" "<=<" "<-|" "<~>" "<=|" "<~~" "<$>" "<+>" "</>"
-			       "<*>" "<->" "<=" "<|" "<:" "<>"  "<$" "<-" "<~" "<+"
-			       "</" "<*")
-			   (+ "<"))))
-	   (?:  . ,(rx (or (or ":?>" "::=" ":>" ":<" ":?" ":=") (+ ":"))))
-	   (?=  . ,(rx (or (or "=>>" "==>" "=/=" "=!=" "=>" "=:=") (+ "="))))
-	   (?!  . ,(rx (or (or "!==" "!=") (+ "!"))))
-	   (?>  . ,(rx (or (or ">>-" ">>=" ">=>" ">]" ">:" ">-" ">=") (+ ">"))))
-	   (?&  . ,(rx (+ "&")))
-	   (?|  . ,(rx (or (or "|->" "|||>" "||>" "|=>" "||-" "||=" "|-" "|>"
-			       "|]" "|}" "|=")
-			   (+ "|"))))
-	   (?.  . ,(rx (or (or ".?" ".=" ".-" "..<") (+ "."))))
-	   (?+  . ,(rx (or "+>" (+ "+"))))
-	   (?\[ . ,(rx (or "[<" "[|")))
-	   (?\{ . ,(rx "{|"))
-	   (?\? . ,(rx (or (or "?." "?=" "?:") (+ "?"))))
-	   (?#  . ,(rx (or (or "#_(" "#[" "#{" "#=" "#!" "#:" "#_" "#?" "#(")
-			   (+ "#"))))
-	   (?\; . ,(rx (+ ";")))
-	   (?_  . ,(rx (or "_|_" "__")))
-	   (?~  . ,(rx (or "~~>" "~~" "~>" "~-" "~@")))
-	   (?$  . ,(rx "$>"))
-	   (?^  . ,(rx "^="))
-	   (?\] . ,(rx "]#"))))
-  (let ((char (car char/ligature-re))
-	(ligature-re (cdr char/ligature-re)))
-    (set-char-table-range composition-function-table char
-			  `([,ligature-re 0 font-shape-gstring]))))
 
 (use-package org
   :config
