@@ -274,9 +274,6 @@
   (setq emms-player-mpd-server-port "6600")
   (setq emms-player-mpd-music-directory "~/Music/"))
 
-(use-package company-tabnine)
-(setq company-backends '(company-tabnine))
-
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
 (global-tree-sitter-mode)
@@ -340,14 +337,14 @@
   :ensure t
 
   :custom
-  (lsp-ui-doc-alignment 'window)
+  (lsp-ui-doc-alignment 'frame)
   (lsp-ui-doc-delay 0.2)
   (lsp-ui-doc-enable t)
   (lsp-ui-doc-header nil)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-max-height 45)
-  (lsp-ui-doc-position 'at-point)
-  (lsp-ui-doc-show-with-cursor t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-show-with-cursor nil)
   (lsp-ui-doc-show-with-mouse nil)
   (lsp-ui-doc-use-webkit nil)
   (lsp-ui-peek-always-show nil)
@@ -386,8 +383,14 @@
   "ll" '(lsp-avy-lens :which-key "Code lens")
   "lr" '(lsp-rename :which-key "Code lens")
   "lf" '(lsp-format-buffer :which-key "Format buffer")
-  "ld" '(lsp-ui-peek-find-definitions :which-key "Goto declaration")
+  "lD" '(lsp-ui-peek-find-definitions :which-key "Goto definition")
+  "ld" '(lsp-find-declaration :which-key "Find declaration")
+  "lt" '(lsp-find-type-definition :which-key "Find type")
   "le" '(helm-lsp-diagnostics :which-key "Error diagnostics")
+  "ls" '(lsp-signature-help :which-key "Signature help")
+  "lR" '(lsp-find-references :which-key "Find references")
+  "lm" '(lsp-ui-imenu :which-key "Imenu")
+  "lo" '(lsp-describe-thing-at-point :which-key "Documentation")
   "la" '(lsp-ui-peek-find-implementation :which-key "Code implement"))
 
 (use-package dap-mode
@@ -555,6 +558,33 @@
 	  (lambda ()
 	    (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
 
+(setq package-selected-packages 
+      '(dart-mode lsp-mode lsp-dart lsp-treemacs flycheck company
+		  ;; Optional packages
+		  lsp-ui company hover))
+
+(use-package dart-mode)
+
+;; export ANDROID_HOME=$HOME/Android
+;; export PATH=$ANDROID_HOME/cmdline-tools/tools/bin/:$PATH
+;; export PATH=$ANDROID_HOME/platform-tools/:$PATH
+
+;; export PATH="$PATH:$HOME/Android/flutter/bin/"
+
+
+(setq lsp-dart-sdk-dir "~/flutter/bin/cache/dart-sdk/")
+
+
+(add-hook 'dart-mode-hook 'lsp)
+
+(use-package lsp-dart) 
+(use-package hover)
+
+(use-package flutter
+  :after dart-mode
+  :custom
+  (flutter-sdk-path "~/flutter/"))
+
 (use-package hydra)
 (use-package smerge-mode
   :config
@@ -652,6 +682,8 @@ _k_: down      _a_: combine       _q_: quit
   "cd" '(docker-compose :which-key "Docker Compose")
   "ci" '(docker-images :which-key "Docker Images")
   )
+
+(use-package dockerfile-mode)
 
 (use-package kubernetes
   :ensure t
