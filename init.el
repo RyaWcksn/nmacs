@@ -111,7 +111,7 @@
   (dashboard-setup-startup-hook))
 
 (setq dashboard-banner-logo-title "Personal Development Environment")
-(setq dashboard-startup-banner "~/.emacs.d/fuyuko.png" )
+(setq dashboard-startup-banner "~/.config/bspwm/assets/greeting.png" )
 (setq dashboard-center-content t)
 (setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
 (setq dashboard-show-shortcuts nil) 
@@ -142,6 +142,9 @@
 					((string-match "^ [!\\?]" noback) 'mode-line-vc-modified))))
 		       (format " %s" (substring noback 2)))))
 		"  "
+		(:eval (when (and (bound-and-true-p lsp-mode) (lsp--client-servers))
+			 (format "LSP[%s]" (mapconcat 'lsp--client-server-id (lsp--client-servers) ", ")))
+		       )
 		mode-line-misc-info
 		mode-line-end-spaces
 		))
@@ -272,7 +275,15 @@
   (add-to-list 'emms-player-list 'emms-player-mpd)
   (setq emms-player-mpd-server-name "localhost")
   (setq emms-player-mpd-server-port "6600")
-  (setq emms-player-mpd-music-directory "~/Music/"))
+  :custom
+  (emms-source-file-default-directory "~/Music/")
+  :bind
+  (("<f5>" . emms-browser)
+   ("<M-f5>" . emms)
+   ("<XF86AudioPrev>" . emms-previous)
+   ("<XF86AudioNext>" . emms-next)
+   ("<XF86AudioPlay>" . emms-pause))
+  )
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
@@ -462,8 +473,8 @@
     (add-to-list 'projectile-project-root-files-bottom-up "go.mod")
     (add-to-list 'projectile-project-root-files-bottom-up "go.sum"))
   :hook
-  (
-   (go-mode . lsp-deferred)
+  ((go-mode . lsp-deferred)
+   (go-mode . flycheck-mode)
    (go-mode . company-mode))
   :config
   (setq gofmt-command "gofmt")
@@ -490,7 +501,6 @@
 			  (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
 
 (use-package flycheck-golangci-lint
-  :ensure t
   :hook (go-mode . flycheck-golangci-lint-setup))
 
 (defun my/get-config-path (config-file-name)
@@ -502,7 +512,7 @@
 	  config-path
 	(error "configuration file '%s' not found in project root '%s'" config-file-name project-root)))))
 
-(setq my/config-path (my/get-config-path "src/config.json"))
+(setq my/config-path (my/get-config-path ".golangci.yaml"))
 (setq flycheck-golangci-lint-config my/config-path)
 
 (use-package go-add-tags :ensure t)
@@ -540,17 +550,25 @@
 
 (use-package lsp-java
   :if (executable-find "mvn")
-  :init
-  :config (add-hook 'java-mode-hook 'lsp)
+  :hook
+  ((java-mode . company-mode)
+   (java-mode . flycheck-mode)
+   (java-mode . lsp-deferred))
+  :config
   (use-package request :defer t)
+  (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+  (setq lsp-java-java-path
+	"/usr/lib/jvm/java-17-openjdk-amd64/bin/java")
   :custom
   (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/server/"))
   (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/workspace/")))
 (require 'lsp-java-boot)
-(add-hook 'lsp-mode-hook #'lsp-lens-mode)
-(add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
-(setq lsp-java-java-path
-      "/usr/lib/jvm/java-20-openjdk-amd64/bin/java")
+
+(add-to-list 'tree-sitter-major-mode-language-alist
+	     '(java-mode . java))
+
+;; Hook Tree-sitter mode into your major modes
+(add-hook 'java-mode-hook #'tree-sitter-hl-mode)
 
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
@@ -584,6 +602,29 @@
   :after dart-mode
   :custom
   (flutter-sdk-path "~/flutter/"))
+
+(use-package rust-mode
+  :hook
+  ((rust-mode . company-mode)
+   (rust-mode . lsp-deferred))
+  :config
+  (setq lsp-rust-server 'rust-analyzer)
+  (setq rust-format-on-save t)
+  (add-hook 'rust-mode-hook
+	    (lambda () (setq indent-tabs-mode nil)))
+  (add-hook 'rust-mode-hook
+	    (lambda () (prettify-symbols-mode)))
+  )
+
+(use-package cargo-mode
+  :config
+  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+
+(add-to-list 'tree-sitter-major-mode-language-alist
+	     '(rust-mode . rust))
+
+;; Hook Tree-sitter mode into your major modes
+(add-hook 'rust-mode-hook #'tree-sitter-hl-mode)
 
 (use-package hydra)
 (use-package smerge-mode

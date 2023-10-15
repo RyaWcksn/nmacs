@@ -1,4 +1,4 @@
-#+author: Pramudya Arya Wicaksana
+#+AUTHOR: Pramudya Arya Wicaksana
 #+TITLE: Vanilla Emacs configuration
 #+EMAIL: pram.aryawcksn@gmail.com
 #+SUBTITLE: Config for GO and Flutter development, also note taking!
@@ -227,7 +227,7 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
     (dashboard-setup-startup-hook))
 
   (setq dashboard-banner-logo-title "Personal Development Environment")
-  (setq dashboard-startup-banner "~/.emacs.d/fuyuko.png" )
+  (setq dashboard-startup-banner "~/.config/bspwm/assets/greeting.png" )
   (setq dashboard-center-content t)
   (setq dashboard-icon-type 'all-the-icons) ;; use `all-the-icons' package
   (setq dashboard-show-shortcuts nil) 
@@ -257,6 +257,7 @@ Language and all other icons pack
 Modeline using vanilla emacs with only limited info that i really need
 
 #+begin_src emacs-lisp
+
   (setq display-battery-mode t)
   (setq display-time-mode t)
   (setq-default mode-line-format
@@ -274,6 +275,9 @@ Modeline using vanilla emacs with only limited info that i really need
 					  ((string-match "^ [!\\?]" noback) 'mode-line-vc-modified))))
 			 (format " %s" (substring noback 2)))))
 		  "  "
+		  (:eval (when (and (bound-and-true-p lsp-mode) (lsp--client-servers))
+			   (format "LSP[%s]" (mapconcat 'lsp--client-server-id (lsp--client-servers) ", ")))
+			 )
 		  mode-line-misc-info
 		  mode-line-end-spaces
 		  ))
@@ -518,11 +522,19 @@ Multimedia for emacs
     (add-to-list 'emms-player-list 'emms-player-mpd)
     (setq emms-player-mpd-server-name "localhost")
     (setq emms-player-mpd-server-port "6600")
-    (setq emms-player-mpd-music-directory "~/Music/"))
+    :custom
+    (emms-source-file-default-directory "~/Music/")
+    :bind
+    (("<f5>" . emms-browser)
+     ("<M-f5>" . emms)
+     ("<XF86AudioPrev>" . emms-previous)
+     ("<XF86AudioNext>" . emms-next)
+     ("<XF86AudioPlay>" . emms-pause))
+    )
 #+end_src
 
 #+RESULTS:
-: t
+: emms-pause
 
 * Programming
 ** Treesitter
@@ -751,7 +763,6 @@ Template system for emacs
 #+RESULTS:
 | company-capf | company-yasnippet |
 
-
 ** Flycheck
 
 Flycheck an error or info
@@ -795,8 +806,8 @@ GO configuration language using =gopls=
       (add-to-list 'projectile-project-root-files-bottom-up "go.mod")
       (add-to-list 'projectile-project-root-files-bottom-up "go.sum"))
     :hook
-    (
-     (go-mode . lsp-deferred)
+    ((go-mode . lsp-deferred)
+     (go-mode . flycheck-mode)
      (go-mode . company-mode))
     :config
     (setq gofmt-command "gofmt")
@@ -832,7 +843,6 @@ Flycheck for go
 
 #+begin_src emacs-lisp
   (use-package flycheck-golangci-lint
-    :ensure t
     :hook (go-mode . flycheck-golangci-lint-setup))
 
   (defun my/get-config-path (config-file-name)
@@ -844,7 +854,7 @@ Flycheck for go
 	    config-path
 	  (error "configuration file '%s' not found in project root '%s'" config-file-name project-root)))))
 
-  (setq my/config-path (my/get-config-path "src/config.json"))
+  (setq my/config-path (my/get-config-path ".golangci.yaml"))
   (setq flycheck-golangci-lint-config my/config-path)
 
 
@@ -926,21 +936,29 @@ Java configuration for Spring boot etc
 #+begin_src emacs-lisp
   (use-package lsp-java
     :if (executable-find "mvn")
-    :init
-    :config (add-hook 'java-mode-hook 'lsp)
+    :hook
+    ((java-mode . company-mode)
+     (java-mode . flycheck-mode)
+     (java-mode . lsp-deferred))
+    :config
     (use-package request :defer t)
+    (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+    (setq lsp-java-java-path
+	  "/usr/lib/jvm/java-17-openjdk-amd64/bin/java")
     :custom
     (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/server/"))
     (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/workspace/")))
   (require 'lsp-java-boot)
-  (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-  (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
-  (setq lsp-java-java-path
-	"/usr/lib/jvm/java-20-openjdk-amd64/bin/java")
+
+  (add-to-list 'tree-sitter-major-mode-language-alist
+	       '(java-mode . java))
+
+  ;; Hook Tree-sitter mode into your major modes
+  (add-hook 'java-mode-hook #'tree-sitter-hl-mode)
 #+end_src
 
 #+RESULTS:
-: /usr/lib/jvm/java-20-openjdk-amd64/bin/java
+| tree-sitter-hl-mode | (lambda nil (lsp-java-boot-lens-mode)) | lsp-deferred | flycheck-mode | company-mode | lsp-java-boot-lens-mode | lsp |
 
 *** Yaml
 #+begin_src emacs-lisp
@@ -1002,6 +1020,46 @@ Flutter
 #+end_src
 
 #+RESULTS:
+
+*** Rust
+
+Rust setup
+
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :hook
+    ((rust-mode . company-mode)
+     (rust-mode . lsp-deferred))
+    :config
+    (setq lsp-rust-server 'rust-analyzer)
+    (setq rust-format-on-save t)
+    (add-hook 'rust-mode-hook
+	      (lambda () (setq indent-tabs-mode nil)))
+    (add-hook 'rust-mode-hook
+	      (lambda () (prettify-symbols-mode)))
+    )
+
+  (use-package cargo-mode
+    :config
+    (add-hook 'rust-mode-hook 'cargo-minor-mode))
+
+#+end_src
+
+#+RESULTS:
+: t
+
+Rust treesitter
+
+#+begin_src emacs-lisp
+  (add-to-list 'tree-sitter-major-mode-language-alist
+	       '(rust-mode . rust))
+
+  ;; Hook Tree-sitter mode into your major modes
+  (add-hook 'rust-mode-hook #'tree-sitter-hl-mode)
+#+end_src
+
+#+RESULTS:
+| tree-sitter-hl-mode | (lambda nil (prettify-symbols-mode)) | (lambda nil (setq indent-tabs-mode nil)) | rust-maybe-initialize-buffer-project | cargo-minor-mode | lsp-deferred | flycheck-mode |
 
 ** Smerge
 
