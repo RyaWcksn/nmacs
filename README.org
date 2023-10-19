@@ -109,9 +109,6 @@ Shell configuration using ZSH
 #+begin_src emacs-lisp
   (set-frame-font "JetBrains Mono 10" nil t)
   (add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
-
-  ;;
-
 #+end_src
 
 #+RESULTS:
@@ -604,6 +601,11 @@ LSP backend for every language i use
   ;; optionally if you want to use debugger
   (use-package dap-mode)
   ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+  (setq-default ;; alloc.c
+   gc-cons-threshold (* 20 1204 1204)
+   gc-cons-percentage 0.5)
+  (setq gc-cons-threshold (* 2 1000 1000)) ; Increase the garbage collection threshold
+
 
   ;; optional if you want which-key integration
   (use-package which-key
@@ -758,10 +760,14 @@ Template system for emacs
     )
 
   (setq company-backends '((company-capf company-yasnippet)))
+
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
+
 #+end_src
 
 #+RESULTS:
-| company-capf | company-yasnippet |
+| company-box-mode |
 
 ** Flycheck
 
@@ -811,16 +817,7 @@ GO configuration language using =gopls=
      (go-mode . company-mode))
     :config
     (setq gofmt-command "gofmt")
-    (require 'lsp-go)
-    (setq lsp-go-analyses
-	  '((fieldalignment . t)
-	    (nilness . t)
-	    (httpresponse . t)
-	    (unusedwrite . t)
-	    (unusedparams . t)
-	    )))
-
-  (provide 'gopls-config)
+    (require 'lsp-go))
 
   (defun lsp-go-install-save-hooks ()
     (add-hook 'before-save-hook #'lsp-format-buffer t t)
@@ -837,7 +834,7 @@ GO configuration language using =gopls=
 #+end_src
 
 #+RESULTS:
-| flycheck-golangci-lint-setup | (lambda nil (flycheck-golangci-lint-setup) (setq flycheck-local-checkers '((lsp (next-checkers golangci-lint))))) | yas-minor-mode | lsp-go-install-save-hooks | company-mode | lsp-deferred |
+| tree-sitter-hl-mode | flycheck-golangci-lint-setup | (lambda nil (flycheck-golangci-lint-setup) (setq flycheck-local-checkers '((lsp (next-checkers golangci-lint))))) | yas-minor-mode | lsp-go-install-save-hooks | company-mode | flycheck-mode | lsp-deferred |
 
 Flycheck for go
 
@@ -1060,6 +1057,24 @@ Rust treesitter
 
 #+RESULTS:
 | tree-sitter-hl-mode | (lambda nil (prettify-symbols-mode)) | (lambda nil (setq indent-tabs-mode nil)) | rust-maybe-initialize-buffer-project | cargo-minor-mode | lsp-deferred | flycheck-mode |
+
+*** Web
+Web related languages, PHP, etc
+
+#+begin_src emacs-lisp
+  (use-package php-mode
+    :hook
+    (php-mode . lsp-deffered)
+    (php-mode . company-mode))
+  (add-to-list 'auto-mode-alist '("\\.blade.php\\'" . php-mode))
+  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . php-mode))
+  (add-to-list 'auto-mode-alist '("\\.blade\\'" . php-mode))
+  (add-to-list 'auto-mode-alist '("\\.php\\'" . php-mode))
+  (use-package phpunit)
+
+#+end_src
+
+#+RESULTS:
 
 ** Smerge
 
@@ -1466,7 +1481,6 @@ Prespective for each workspaces
     :init
     (persp-mode))
 
-
   (neko/leader-keys
     "p"  '(:ignore t :which-key "Perspective")
     "ps" '(persp-switch :which-key "Switch perspective")
@@ -1541,7 +1555,8 @@ Generic wide system keybinding
     "oa" '(org-agenda :which-key "Org Agenda")
     "oc" '(cfw:open-org-calendar :which-key "Calendar")
     "oe" '(neotree :which-key "Neotree")
-    "od" '(dired :which-key "Dired")) 
+    "od" '(dashboard-open :which-key "Dashboard")
+    "oD" '(dired :which-key "Dired")) 
 #+end_src
 
 #+RESULTS:

@@ -48,8 +48,6 @@
 (set-frame-font "JetBrains Mono 10" nil t)
 (add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
 
-;;
-
 (dolist (char/ligature-re
 	 `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
 	   (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
@@ -338,6 +336,11 @@
 ;; optionally if you want to use debugger
 (use-package dap-mode)
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+(setq-default ;; alloc.c
+ gc-cons-threshold (* 20 1204 1204)
+ gc-cons-percentage 0.5)
+(setq gc-cons-threshold (* 2 1000 1000)) ; Increase the garbage collection threshold
+
 
 ;; optional if you want which-key integration
 (use-package which-key
@@ -456,6 +459,9 @@
 
 (setq company-backends '((company-capf company-yasnippet)))
 
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
 (use-package flycheck :ensure t)
 
 (use-package yasnippet :ensure t
@@ -478,16 +484,7 @@
    (go-mode . company-mode))
   :config
   (setq gofmt-command "gofmt")
-  (require 'lsp-go)
-  (setq lsp-go-analyses
-	'((fieldalignment . t)
-	  (nilness . t)
-	  (httpresponse . t)
-	  (unusedwrite . t)
-	  (unusedparams . t)
-	  )))
-
-(provide 'gopls-config)
+  (require 'lsp-go))
 
 (defun lsp-go-install-save-hooks ()
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
@@ -625,6 +622,16 @@
 
 ;; Hook Tree-sitter mode into your major modes
 (add-hook 'rust-mode-hook #'tree-sitter-hl-mode)
+
+(use-package php-mode
+  :hook
+  (php-mode . lsp-deffered)
+  (php-mode . company-mode))
+(add-to-list 'auto-mode-alist '("\\.blade.php\\'" . php-mode))
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . php-mode))
+(add-to-list 'auto-mode-alist '("\\.blade\\'" . php-mode))
+(add-to-list 'auto-mode-alist '("\\.php\\'" . php-mode))
+(use-package phpunit)
 
 (use-package hydra)
 (use-package smerge-mode
@@ -866,7 +873,6 @@ _k_: down      _a_: combine       _q_: quit
   :init
   (persp-mode))
 
-
 (neko/leader-keys
   "p"  '(:ignore t :which-key "Perspective")
   "ps" '(persp-switch :which-key "Switch perspective")
@@ -913,4 +919,5 @@ _k_: down      _a_: combine       _q_: quit
   "oa" '(org-agenda :which-key "Org Agenda")
   "oc" '(cfw:open-org-calendar :which-key "Calendar")
   "oe" '(neotree :which-key "Neotree")
-  "od" '(dired :which-key "Dired"))
+  "od" '(dashboard-open :which-key "Dashboard")
+  "oD" '(dired :which-key "Dired"))
