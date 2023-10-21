@@ -1,0 +1,17 @@
+;;;; Emacs Bookmark Format Version 1;;;; -*- coding: utf-8-emacs; mode: lisp-data -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("Work"
+ (filename . "~/Work/")
+ (front-context-string . "go-pdf\n  drwxrwx")
+ (rear-context-string . "32 Oct 16 10:48 ")
+ (position . 165)
+ (last-modified 25900 45840 644259 617000))
+("Sandbox"
+ (filename . "~/Sandbox/")
+ (front-context-string . ".\n  drwxr-x--- 6")
+ (rear-context-string . "96 Oct 16 03:47 ")
+ (position . 65)
+ (last-modified 25900 20456 788348 226000))
+)

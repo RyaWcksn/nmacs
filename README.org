@@ -257,8 +257,12 @@ Modeline using vanilla emacs with only limited info that i really need
 
   (setq display-battery-mode t)
   (setq display-time-mode t)
+  (setq mode-line-percent-position '(-3 "%p"))
+
   (setq-default mode-line-format
-		'("%e"
+		'(
+		  "有"
+		  "%e"
 		  mode-line-front-space
 		  mode-line-frame-identification
 		  mode-line-buffer-identification
@@ -279,7 +283,6 @@ Modeline using vanilla emacs with only limited info that i really need
 		  mode-line-end-spaces
 		  ))
   (setq mode-line-position (list "(%l,%c)"))
-
 #+end_src
 
 #+RESULTS:

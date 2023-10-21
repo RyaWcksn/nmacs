@@ -125,8 +125,12 @@
 
 (setq display-battery-mode t)
 (setq display-time-mode t)
+(setq mode-line-percent-position '(-3 "%p"))
+
 (setq-default mode-line-format
-	      '("%e"
+	      '(
+		"有"
+		"%e"
 		mode-line-front-space
 		mode-line-frame-identification
 		mode-line-buffer-identification
