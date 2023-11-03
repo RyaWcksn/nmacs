@@ -1,0 +1,40 @@
+* My personal linux config
+
+Here's my literate block for my personal linux device
+
+* Initial package
+
+#+begin_src sh :dir /sudo:: :results output
+  apt install tmux zsh mpd ncmpcpp curl wget unzip unrar
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Reading package lists... 0%Reading package lists... 100%Reading package lists... Done
+Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree... Done
+Reading state information... 0% Reading state information... 0%Reading state information... Done
+tmux is already the newest version (3.3a-3).
+zsh is already the newest version (5.9-4).
+mpd is already the newest version (0.23.12-1build1).
+ncmpcpp is already the newest version (0.9.2-2build5).
+curl is already the newest version (7.88.1-8ubuntu2.3).
+wget is already the newest version (1.21.3-1ubuntu1).
+unzip is already the newest version (6.0-27ubuntu1).
+unrar is already the newest version (1:6.2.6-1).
+0 upgraded, 0 newly installed, 0 to remove and 106 not upgraded.
+#+end_example
+
+* Mobile development
+
+All about mobile dev, mainly android
+
+** Commandline tools installation
+
+#+NAME: get_android_tools_version
+#+BEGIN_SRC sh :dir /sudo:: :results output :var url="https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" :var target_dir="~/Documents"
+  wget $url -O android_tools.zip
+#+END_SRC
+
+#+RESULTS: get_android_tools_version
+
+**  ps

@@ -10,3 +10,8 @@
 /auto-save-list/
 /.lsp-session-v1
 /.dap-breakpoints
+.cache
+eclipse.jdt.ls
+image-dired
+lsp-cache
+request

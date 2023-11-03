@@ -1,12 +1,63 @@
+% Created 2023-11-03 Fri 23:57
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\onehalfspacing
+\author{Pramudya Arya Wicaksana}
+\date{\today}
+\title{Vanilla Emacs configuration\\\medskip
+\large Config for GO, Java and Flutter development, also note taking!}
+\hypersetup{
+ pdfauthor={Pramudya Arya Wicaksana},
+ pdftitle={Vanilla Emacs configuration},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.1 (Org mode 9.6.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Making emacs work for me}
+\label{sec:org1f361df}
+
+\subsection{How to use my config}
+\label{sec:org4ff7f2d}
+
+Just directly clone this repo to \texttt{\$HOME/.emacs.d/} folder and open your emacs\textasciitilde{}
+
+This config working on version emacs24
+
+\section{Simple config}
+\label{sec:orgc2a5726}
+
+\begin{verbatim}
 (setq byte-compile-warnings '(cl-functions))
 (global-auto-revert-mode t)
-(setq-default cursor-type 'bar)
+(setq-default cursor-type 'bar) 
 
+\end{verbatim}
+
+\section{Package Manager}
+\label{sec:org4cd8560}
+\begin{verbatim}
 (require 'package)
 (setq package-archives
       '(("melpa" . "https://melpa.org/packages/")
-	("org" . "https://orgmode.org/elpa/")
-	("elpa" . "https://elpa.gnu.org/packages/")))
+        ("org" . "https://orgmode.org/elpa/")
+        ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
 
@@ -16,24 +67,49 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 (setq package-enable-at-startup nil)
+\end{verbatim}
 
+\section{Add PATH}
+\label{sec:org0b2388b}
+
+Adding \texttt{.zshrc} stuff as path
+
+\begin{verbatim}
 (let ((path (shell-command-to-string ". ~/.zshrc; echo -n $PATH")))
   (setenv "PATH" path)
   (setq exec-path 
-	(append
-	 (split-string-and-unquote path ":")
-	 exec-path)))
+        (append
+         (split-string-and-unquote path ":")
+         exec-path)))
+\end{verbatim}
 
+\section{Shell}
+\label{sec:orgf301913}
+
+Shell configuration using ZSH
+
+\begin{verbatim}
 (setq explicit-shell-file-name "/usr/bin/zsh")
 (setq shell-file-name "zsh")
 (setq explicit-zsh-args '("--login" "--interactive"))
 (defun zsh-shell-mode-setup ()
   (setq-local comint-process-echoes t))
 (add-hook 'shell-mode-hook #'zsh-shell-mode-setup)
+\end{verbatim}
 
+\section{Display and look}
+\label{sec:orgfa1d00c}
+\subsection{Line number}
+\label{sec:org50cdebf}
+\begin{verbatim}
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq display-line-numbers-type 'relative)
+\end{verbatim}
 
+\subsection{Theme}
+\label{sec:org0eeee7b}
+
+\begin{verbatim}
 (use-package atom-one-dark-theme)
 (load-theme 'atom-one-dark t)
 (if (display-graphic-p)
@@ -42,63 +118,117 @@
   ;; Code for terminal frames
   (load-theme 'atom-one-dark t))
 
+\end{verbatim}
+
+\subsection{Font}
+\label{sec:orga179470}
+
+\begin{verbatim}
 (set-frame-font "JetBrains Mono 10" nil t)
 (add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
+\end{verbatim}
 
+\subsection{Lignature}
+\label{sec:org3c73dd6}
+
+Show programming lignature
+
+\begin{verbatim}
 (dolist (char/ligature-re
-	 `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
-	   (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
-	   (?*  . ,(rx (or (or "*>" "*/") (+ "*"))))
-	   (?<  . ,(rx (or (or "<<=" "<<-" "<|||" "<==>" "<!--" "<=>" "<||" "<|>" "<-<"
-			       "<==" "<=<" "<-|" "<~>" "<=|" "<~~" "<$>" "<+>" "</>"
-			       "<*>" "<->" "<=" "<|" "<:" "<>"  "<$" "<-" "<~" "<+"
-			       "</" "<*")
-			   (+ "<"))))
-	   (?:  . ,(rx (or (or ":?>" "::=" ":>" ":<" ":?" ":=") (+ ":"))))
-	   (?=  . ,(rx (or (or "=>>" "==>" "=/=" "=!=" "=>" "=:=") (+ "="))))
-	   (?!  . ,(rx (or (or "!==" "!=") (+ "!"))))
-	   (?>  . ,(rx (or (or ">>-" ">>=" ">=>" ">]" ">:" ">-" ">=") (+ ">"))))
-	   (?&  . ,(rx (+ "&")))
-	   (?|  . ,(rx (or (or "|->" "|||>" "||>" "|=>" "||-" "||=" "|-" "|>"
-			       "|]" "|}" "|=")
-			   (+ "|"))))
-	   (?.  . ,(rx (or (or ".?" ".=" ".-" "..<") (+ "."))))
-	   (?+  . ,(rx (or "+>" (+ "+"))))
-	   (?\[ . ,(rx (or "[<" "[|")))
-	   (?\{ . ,(rx "{|"))
-	   (?\? . ,(rx (or (or "?." "?=" "?:") (+ "?"))))
-	   (?#  . ,(rx (or (or "#_(" "#[" "#{" "#=" "#!" "#:" "#_" "#?" "#(")
-			   (+ "#"))))
-	   (?\; . ,(rx (+ ";")))
-	   (?_  . ,(rx (or "_|_" "__")))
-	   (?~  . ,(rx (or "~~>" "~~" "~>" "~-" "~@")))
-	   (?$  . ,(rx "$>"))
-	   (?^  . ,(rx "^="))
-	   (?\] . ,(rx "]#"))))
+         `((?-  . ,(rx (or (or "-->" "-<<" "->>" "-|" "-~" "-<" "->") (+ "-"))))
+           (?/  . ,(rx (or (or "/==" "/=" "/>" "/**" "/*") (+ "/"))))
+           (?*  . ,(rx (or (or "*>" "*/") (+ "*"))))
+           (?<  . ,(rx (or (or "<<=" "<<-" "<|||" "<==>" "<!--" "<=>" "<||" "<|>" "<-<"
+                               "<==" "<=<" "<-|" "<~>" "<=|" "<~~" "<$>" "<+>" "</>"
+                               "<*>" "<->" "<=" "<|" "<:" "<>"  "<$" "<-" "<~" "<+"
+                               "</" "<*")
+                           (+ "<"))))
+           (?:  . ,(rx (or (or ":?>" "::=" ":>" ":<" ":?" ":=") (+ ":"))))
+           (?=  . ,(rx (or (or "=>>" "==>" "=/=" "=!=" "=>" "=:=") (+ "="))))
+           (?!  . ,(rx (or (or "!==" "!=") (+ "!"))))
+           (?>  . ,(rx (or (or ">>-" ">>=" ">=>" ">]" ">:" ">-" ">=") (+ ">"))))
+           (?&  . ,(rx (+ "&")))
+           (?|  . ,(rx (or (or "|->" "|||>" "||>" "|=>" "||-" "||=" "|-" "|>"
+                               "|]" "|}" "|=")
+                           (+ "|"))))
+           (?.  . ,(rx (or (or ".?" ".=" ".-" "..<") (+ "."))))
+           (?+  . ,(rx (or "+>" (+ "+"))))
+           (?\[ . ,(rx (or "[<" "[|")))
+           (?\{ . ,(rx "{|"))
+           (?\? . ,(rx (or (or "?." "?=" "?:") (+ "?"))))
+           (?#  . ,(rx (or (or "#_(" "#[" "#{" "#=" "#!" "#:" "#_" "#?" "#(")
+                           (+ "#"))))
+           (?\; . ,(rx (+ ";")))
+           (?_  . ,(rx (or "_|_" "__")))
+           (?~  . ,(rx (or "~~>" "~~" "~>" "~-" "~@")))
+           (?$  . ,(rx "$>"))
+           (?^  . ,(rx "^="))
+           (?\] . ,(rx "]#"))))
   (let ((char (car char/ligature-re))
-	(ligature-re (cdr char/ligature-re)))
+        (ligature-re (cdr char/ligature-re)))
     (set-char-table-range composition-function-table char
-			  `([,ligature-re 0 font-shape-gstring]))))
+                          `([,ligature-re 0 font-shape-gstring]))))
+\end{verbatim}
 
+\subsection{Reduce clutter}
+\label{sec:orgc5063a7}
+
+Remove the toolbar. It's ugly and I never use it. Also remove the
+scroll bars; below, I set up the fringe to show my position in a
+buffer.
+
+\begin{verbatim}
 (when (window-system)
   (add-to-list 'image-types 'svg)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode 1))
+\end{verbatim}
 
+When running emacs in a terminal, remove the menu bar.
+
+\begin{verbatim}
 (when (not (window-system))
   (tool-bar-mode -1)
   (load-theme 'atom-one-dark t)
   (menu-bar-mode -1))
+\end{verbatim}
 
+\subsection{Basic functionality}
+\label{sec:orgc2eab3f}
+
+Default of yes or no to y n p
+\begin{verbatim}
 ;; Y/N
 (defalias 'yes-or-no-p 'y-or-n-p)
+\end{verbatim}
 
+Clipboard functionality
+\begin{verbatim}
 (use-package clipetty)
 (global-clipetty-mode)
+\end{verbatim}
 
+\subsection{Icons}
+\label{sec:org610a175}
+
+Language and all other icons pack
+
+\begin{verbatim}
 (use-package all-the-icons)
+\end{verbatim}
 
+\subsection{Dashboard}
+\label{sec:org8b840b1}
+
+Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shortcuts!
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./fuyuko.png}
+\caption{Fuyuko Mayuzumi}
+\end{figure}
+\begin{verbatim}
 (use-package dashboard
   :ensure t
   :config
@@ -112,42 +242,64 @@
 (setq dashboard-image-banner-max-height 200)
 (setq dashboard-agenda-time-string-format "%Y-%m-%d %H:%M")
 (setq dashboard-items '((projects . 7)
-			(bookmarks . 3)
-			(agenda . 2)))
+                        (bookmarks . 3)
+                        (agenda . 2)))
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+\end{verbatim}
+
+\subsection{Modeline}
+\label{sec:org804fce8}
+
+Modeline using vanilla emacs with only limited info that i really need
+
+\begin{verbatim}
 
 (setq display-battery-mode t)
 (setq display-time-mode t)
 (setq display-time t)
 (setq-default mode-line-format
-	      '(
-		"有"
-		"%e"
-		mode-line-front-space
-		mode-line-frame-identification
-		mode-line-buffer-identification
-		" "
-		mode-line-position
-		(:eval
-		 (if vc-mode
-		     (let* ((noback (replace-regexp-in-string (format "^ %s" (vc-backend buffer-file-name)) " " vc-mode))
-			    (face (cond ((string-match "^ -" noback) 'mode-line-vc)
-					((string-match "^ [:@]" noback) 'mode-line-vc-edit)
-					((string-match "^ [!\\?]" noback) 'mode-line-vc-modified))))
-		       (format " %s" (substring noback 2)))))
-		"  "
-		(:eval (when (and (bound-and-true-p lsp-mode) (lsp--client-servers))
-			 (format "LSP[%s]" (mapconcat 'lsp--client-server-id (lsp--client-servers) ", ")))
-		       )
-		mode-line-misc-info
-		mode-line-end-spaces
-		))
+              '(
+                "有"
+                "%e"
+                mode-line-front-space
+                mode-line-frame-identification
+                mode-line-buffer-identification
+                " "
+                mode-line-position
+                (:eval
+                 (if vc-mode
+                     (let* ((noback (replace-regexp-in-string (format "^ %s" (vc-backend buffer-file-name)) " " vc-mode))
+                            (face (cond ((string-match "^ -" noback) 'mode-line-vc)
+                                        ((string-match "^ [:@]" noback) 'mode-line-vc-edit)
+                                        ((string-match "^ [!\\?]" noback) 'mode-line-vc-modified))))
+                       (format " %s" (substring noback 2)))))
+                "  "
+                (:eval (when (and (bound-and-true-p lsp-mode) (lsp--client-servers))
+                         (format "LSP[%s]" (mapconcat 'lsp--client-server-id (lsp--client-servers) ", ")))
+                       )
+                mode-line-misc-info
+                mode-line-end-spaces
+                ))
+\end{verbatim}
 
+\subsection{Neotree (Filetree)}
+\label{sec:orgc95dc41}
+
+Using neotree for folder tree management
+
+\begin{verbatim}
 (use-package neotree :ensure t)
 (setq neo-smart-open t)
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 (setq x-underline-at-descent-line t)
+\end{verbatim}
 
+\subsection{Tabbar}
+\label{sec:org216fd4a}
+
+Tab bar configurations
+
+\begin{verbatim}
 (tab-bar-mode 1)                           ;; enable tab bar
 (setq tab-bar-show 1)                      ;; hide bar if <= 1 tabs open
 (setq tab-bar-close-button-show nil)       ;; hide tab close / X button
@@ -155,7 +307,11 @@
 (setq tab-bar-tab-hints t)                 ;; show tab numbers
 (defun neko/current-tab-name ()
   (alist-get 'name (tab-bar--current-tab)))
+\end{verbatim}
 
+\subsection{Backup}
+\label{sec:org6059a6d}
+\begin{verbatim}
 (setq
  backup-by-copying t      ; don't clobber symlinks
  backup-directory-alist
@@ -164,17 +320,35 @@
  kept-new-versions 6
  kept-old-versions 2
  version-control t)       ; use versioned backups
+\end{verbatim}
 
+\subsection{Parenthesis}
+\label{sec:orgf49dc08}
+
+All parenthesis config here
+
+\begin{verbatim}
 (use-package smartparens
   :config
   (smartparens-global-mode 1))
+\end{verbatim}
 
+\begin{verbatim}
 (require 'paren)
 (show-paren-mode t)
 (setq show-paren-delay 0)
 (set-face-attribute 'show-paren-match nil :background nil :underline t)
 (setq show-paren-style 'parenthesis) ; can be 'expression' 'parenthesis' and 'mixed'
+\end{verbatim}
 
+\section{Keyboard related stuffs}
+\label{sec:org81468ef}
+\subsection{Evil mode}
+\label{sec:orge5576f2}
+
+Evil binding! for those who come from VIM
+
+\begin{verbatim}
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -207,12 +381,27 @@
 (evil-define-key 'normal 'lsp-ui-doc-frame-mode
   [?q] #'lsp-ui-doc-unfocus-frame)
 
+\end{verbatim}
+
+\subsection{Evil keybind collection}
+\label{sec:orgb7af7dd}
+
+Evil binding collection to match with evil mode
+
+\begin{verbatim}
 (use-package evil-collection
   :ensure t
   :after evil
   :config
   (evil-collection-init))
+\end{verbatim}
 
+\subsection{Undo}
+\label{sec:org190dfc1}
+
+Undo and redo functionality
+
+\begin{verbatim}
 (use-package undo-tree
   :ensure t
   :after evil
@@ -222,6 +411,14 @@
   (global-undo-tree-mode 1))
 (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 
+\end{verbatim}
+
+\subsection{General keybind}
+\label{sec:orgfbe37a5}
+
+General keybind for emacs using \texttt{neko/leader-keys} to bind the keyboard combination
+
+\begin{verbatim}
 (use-package general
   :ensure t)
   :config
@@ -231,16 +428,37 @@
     :global-prefix "SPC")
 (general-auto-unbind-keys t)
 (define-key minibuffer-local-completion-map (kbd "SPC") 'self-insert-command)
+\end{verbatim}
 
+\subsection{Hydra}
+\label{sec:org1542c50}
+
+This is a package for GNU Emacs that can be used to tie related commands into a family of short bindings with a common prefix - a Hydra.
+
+\begin{verbatim}
 (use-package hydra
   :ensure t)
+\end{verbatim}
 
+\subsection{Which key}
+\label{sec:orgf644ee6}
+
+Key hints
+
+\begin{verbatim}
 (use-package which-key
   :diminish (which-key-mode)
   :config
   (setq which-key-idle-delay 0.3)
   (which-key-mode 1))
+\end{verbatim}
 
+\section{Helm}
+\label{sec:orgaf5e76c}
+
+Emacs framework for incremental completions and narrowing selections
+
+\begin{verbatim}
 (use-package helm
   :config
   (global-set-key (kbd "M-x") #'helm-M-x)
@@ -249,13 +467,29 @@
 
 (neko/leader-keys
   "h"  '(helm-command-prefix :which-key "Helm"))
+\end{verbatim}
 
+\section{Third party connection}
+\label{sec:orgd720025}
+\subsection{Elcord}
+\label{sec:orgaf7c77e}
+
+Discord RCP client
+
+\begin{verbatim}
 (use-package elcord :ensure t
   :config
   (setq elcord-display-line-numbers nil)
   (setq elcord-editor-icon "Emacs (Material)")
   )
+\end{verbatim}
 
+\subsection{EMMS}
+\label{sec:org0b45a2c}
+
+Multimedia for emacs
+
+\begin{verbatim}
 (use-package emms
   :config
   (require 'emms-setup)
@@ -263,7 +497,7 @@
   (emms-all)
   (setq emms-player-list '(emms-player-mpd))
   (setq emms-player-list '(emms-player-vlc)
-	emms-info-functions '(emms-info-native))
+        emms-info-functions '(emms-info-native))
   (add-to-list 'emms-info-functions 'emms-info-mpd)
   (add-to-list 'emms-player-list 'emms-player-mpd)
   (setq emms-player-mpd-server-name "localhost")
@@ -277,11 +511,27 @@
    ("<XF86AudioNext>" . emms-next)
    ("<XF86AudioPlay>" . emms-pause))
   )
+\end{verbatim}
 
+\section{Programming}
+\label{sec:org482d6d2}
+\subsection{Treesitter}
+\label{sec:org6e9886b}
+Highlighting for emacs
+
+\begin{verbatim}
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
 (global-tree-sitter-mode)
 
+\end{verbatim}
+
+\subsection{LSP Mode}
+\label{sec:orgb79bc9f}
+
+LSP backend for every language i use
+
+\begin{verbatim}
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
@@ -310,7 +560,7 @@
   (lsp-signature-render-documentation t)
 
   :hook (
-	 (lsp-mode . lsp-enable-which-key-integration))
+         (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
 ;; optionally
@@ -333,7 +583,14 @@
 (use-package which-key
   :config
   (which-key-mode))
+\end{verbatim}
 
+\subsection{LSP UI}
+\label{sec:org07b3225}
+
+LSP UI for more beautiful looks
+
+\begin{verbatim}
 (use-package lsp-ui
   :ensure t
 
@@ -376,6 +633,14 @@
 
 (add-hook 'lsp-ui-doc-frame-mode-hook 'my/setup-lsp-ui-doc-scroll-keys)
 
+\end{verbatim}
+
+\subsection{LSP Mapping}
+\label{sec:org4b39e42}
+
+Map using \texttt{Which key} for LSP related key bindings
+
+\begin{verbatim}
 (neko/leader-keys
   "l"  '(:ignore t :which-key "LSP")
   "lg" '(lsp-goto-type-definition :which-key "Go to definition")
@@ -394,49 +659,65 @@
   "lo" '(lsp-describe-thing-at-point :which-key "Documentation")
   "la" '(lsp-ui-peek-find-implementation :which-key "Code implement"))
 
+
+\end{verbatim}
+
+\subsection{DAP Mode}
+\label{sec:orgfb3a12d}
+
+DAP Debugging for some languages
+
+\begin{verbatim}
 (use-package dap-mode
-	 :ensure t
-	 ;; Uncomment the config below if you want all UI panes to be hidden by default!
-	 ;; :custom
-	 ;; (lsp-enable-dap-auto-configure nil)
-	 ;; :config
-	 ;; (dap-ui-mode 1)
-	 :commands dap-debug
-	 :config
-	 (dap-tooltip-mode 1)
-	 ;; use tooltips for mouse hover
-	 ;; if it is not enabled `dap-mode' will use the minibuffer.
-	 (tooltip-mode 1)
-	 ;; displays floating panel with debug buttons
-	 ;; requies emacs 26+
-	 (dap-ui-controls-mode 1)
-	 ;; Set up Node debugging
-	 (require 'dap-hydra)
-	 (general-define-key
-	  :keymaps 'lsp-mode-map
-	  :prefix lsp-keymap-prefix
-	  "d" '(dap-hydra t :wk "debugger"))
-	 )
+         :ensure t
+         ;; Uncomment the config below if you want all UI panes to be hidden by default!
+         ;; :custom
+         ;; (lsp-enable-dap-auto-configure nil)
+         ;; :config
+         ;; (dap-ui-mode 1)
+         :commands dap-debug
+         :config
+         (dap-tooltip-mode 1)
+         ;; use tooltips for mouse hover
+         ;; if it is not enabled `dap-mode' will use the minibuffer.
+         (tooltip-mode 1)
+         ;; displays floating panel with debug buttons
+         ;; requies emacs 26+
+         (dap-ui-controls-mode 1)
+         ;; Set up Node debugging
+         (require 'dap-hydra)
+         (general-define-key
+          :keymaps 'lsp-mode-map
+          :prefix lsp-keymap-prefix
+          "d" '(dap-hydra t :wk "debugger"))
+         )
 
 (neko/leader-keys
   "d"  '(:ignore t :which-key "Debugging")
   "ds" '(dap-debug t :wk "Start debug")
   "db" '(dap-breakpoint-toggle t :wk "Toggle breakpoint")
   "dd" '(dap-hydra t :wk "Debugger"))
+\end{verbatim}
 
+\subsection{Snippets}
+\label{sec:org549fc7d}
+
+Template system for emacs
+
+\begin{verbatim}
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
   :bind (
-	 :map company-active-map
-	 ("<tab>" . company-complete-common-or-cycle)
-	 ("C-j" . company-select-next-or-abort)
-	 ("C-k" . company-select-previous-or-abort)
-	 ("C-l" . company-other-backend)
-	 ("C-h" . nil)
-	 )
+         :map company-active-map
+         ("<tab>" . company-complete-common-or-cycle)
+         ("C-j" . company-select-next-or-abort)
+         ("C-k" . company-select-previous-or-abort)
+         ("C-l" . company-other-backend)
+         ("C-h" . nil)
+         )
   (:map lsp-mode-map
-	("<tab>" . company-indent-or-complete-common))
+        ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0)
@@ -449,16 +730,40 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-(use-package flycheck :ensure t)
+\end{verbatim}
 
+\subsection{Flycheck}
+\label{sec:orge2ee72c}
+
+Flycheck an error or info
+
+\begin{verbatim}
+(use-package flycheck :ensure t)
+\end{verbatim}
+
+\subsection{Yasnippets}
+\label{sec:orga860bd9}
+
+Snippets for emacs
+
+\begin{verbatim}
 (use-package yasnippet :ensure t
   :config
   ;; (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets/yasnippet-golang/")
   (setq yas-snippet-dirs
-	'("~/.emacs.d/snippets"))
-	(yas-global-mode 1)
-	)
+        '("~/.emacs.d/snippets"))
+        (yas-global-mode 1)
+        )
+\end{verbatim}
 
+\subsection{Languages}
+\label{sec:orgd9e2cc5}
+\subsubsection{GO}
+\label{sec:orgdb6e872}
+
+GO configuration language using \texttt{gopls}
+
+\begin{verbatim}
 (use-package go-mode
   :ensure t
   :init
@@ -481,9 +786,15 @@
 (add-hook 'go-mode-hook #'yas-minor-mode)
 
 (add-hook 'go-mode-hook (lambda()
-			  (flycheck-golangci-lint-setup)
-			  (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
+                          (flycheck-golangci-lint-setup)
+                          (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
 
+
+\end{verbatim}
+
+Flycheck for go
+
+\begin{verbatim}
 (use-package flycheck-golangci-lint
   :hook (go-mode . flycheck-golangci-lint-setup))
 
@@ -491,31 +802,70 @@
   "get the path to config-file-name in the current project as a string, when in `go-mode`."
   (when (eq major-mode 'go-mode)
     (let* ((project-root (projectile-project-root))
-	   (config-path (concat project-root config-file-name)))
+           (config-path (concat project-root config-file-name)))
       (if (file-exists-p config-path)
-	  config-path
-	(error "configuration file '%s' not found in project root '%s'" config-file-name project-root)))))
+          config-path
+        (error "configuration file '%s' not found in project root '%s'" config-file-name project-root)))))
 
 (setq my/config-path (my/get-config-path ".golangci.yaml"))
 (setq flycheck-golangci-lint-config my/config-path)
 
+
+\end{verbatim}
+
+GO tags, Gen test and doctor
+
+\begin{verbatim}
 (use-package go-add-tags :ensure t)
 (use-package go-gen-test :ensure t)
 (use-package godoctor)
+\end{verbatim}
 
+GO Snippets
+
+\begin{verbatim}
 (use-package go-snippets)
+\end{verbatim}
 
+Go treesitter
+
+\begin{verbatim}
 (add-to-list 'tree-sitter-major-mode-language-alist
-	     '(go-mode . go))
+             '(go-mode . go))
 
 ;; Hook Tree-sitter mode into your major modes
 (add-hook 'go-mode-hook #'tree-sitter-hl-mode)
+\end{verbatim}
 
+\subsubsection{Javascript}
+\label{sec:orgc30ed11}
+\begin{enumerate}
+\item RJSX
+\label{sec:orgdeee99e}
+
+This mode derives from js2-mode, extending its parser to support JSX syntax according to the official spec. This means you get all of the js2 features plus proper syntax checking and highlighting of JSX code blocks.
+
+\begin{verbatim}
 (use-package rjsx-mode)
 (add-hook 'js-mode-hook #'lsp)
+\end{verbatim}
 
+\item React snippet
+\label{sec:org17293c3}
+
+ReactJS snippets
+
+\begin{verbatim}
 (use-package react-snippets)
+\end{verbatim}
+\end{enumerate}
 
+\subsubsection{Typescript}
+\label{sec:org78a9935}
+
+Typescript mode 
+
+\begin{verbatim}
 (use-package typescript-mode
   :after tree-sitter
   :config
@@ -529,7 +879,14 @@
   (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
 
 (add-hook 'typescript-mode-hook #'lsp)
+\end{verbatim}
 
+\subsubsection{Java}
+\label{sec:orgc2ebd85}
+
+Java configuration for Spring boot etc
+
+\begin{verbatim}
 (use-package lsp-java
   :if (executable-find "mvn")
   :hook
@@ -540,17 +897,22 @@
   (use-package request :defer t)
   (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
   (setq lsp-java-java-path
-	"/usr/lib/jvm/java-17-openjdk-amd64/bin/java")
+        "/usr/lib/jvm/java-17-openjdk-amd64/bin/java")
   :custom
   (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/server/"))
   (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/eclipse.jdt.ls/workspace/")))
 (require 'lsp-java-boot)
 
 (add-to-list 'tree-sitter-major-mode-language-alist
-	     '(java-mode . java))
+             '(java-mode . java))
 
 (add-hook 'java-mode-hook #'tree-sitter-hl-mode)
+\end{verbatim}
 
+\subsubsection{Scala}
+\label{sec:org34d2282}
+Scala
+\begin{verbatim}
 (use-package scala-mode
   :interpreter ("scala" . scala-mode)
   :hook
@@ -559,16 +921,28 @@
   )
 (use-package lsp-metals)
 
+\end{verbatim}
+
+\subsubsection{Yaml}
+\label{sec:org9e2bbaf}
+\begin{verbatim}
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
 (add-hook 'yaml-mode-hook
-	  (lambda ()
-	    (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
+          (lambda ()
+            (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
+\end{verbatim}
 
+\subsubsection{Dart}
+\label{sec:orgdb9300e}
+
+Dart for mobile development
+
+\begin{verbatim}
 (setq package-selected-packages 
       '(dart-mode lsp-mode lsp-dart lsp-treemacs flycheck company
-		  ;; Optional packages
-		  lsp-ui company hover))
+                  ;; Optional packages
+                  lsp-ui company hover))
 
 (use-package dart-mode)
 
@@ -584,14 +958,30 @@
 
 (add-hook 'dart-mode-hook 'lsp)
 
-(use-package lsp-dart) 
-(use-package hover)
+\end{verbatim}
 
+Dart LSP
+
+\begin{verbatim}
+(use-package lsp-dart) 
+(use-package hover) 
+\end{verbatim}
+
+Flutter
+
+\begin{verbatim}
 (use-package flutter
   :after dart-mode
   :custom
   (flutter-sdk-path "~/flutter/"))
+\end{verbatim}
 
+\subsubsection{Rust}
+\label{sec:org482eb2e}
+
+Rust setup
+
+\begin{verbatim}
 (use-package rust-mode
   :hook
   ((rust-mode . company-mode)
@@ -600,9 +990,9 @@
   (setq lsp-rust-server 'rust-analyzer)
   (setq rust-format-on-save t)
   (add-hook 'rust-mode-hook
-	    (lambda () (setq indent-tabs-mode nil)))
+            (lambda () (setq indent-tabs-mode nil)))
   (add-hook 'rust-mode-hook
-	    (lambda () (prettify-symbols-mode)))
+            (lambda () (prettify-symbols-mode)))
   )
 
 (use-package cargo-mode
@@ -610,11 +1000,17 @@
   (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
 (add-to-list 'tree-sitter-major-mode-language-alist
-	     '(rust-mode . rust))
+             '(rust-mode . rust))
 
 ;; Hook Tree-sitter mode into your major modes
 (add-hook 'rust-mode-hook #'tree-sitter-hl-mode)
+\end{verbatim}
 
+\subsubsection{Web}
+\label{sec:org1bbdea5}
+Web related languages, PHP, etc
+
+\begin{verbatim}
 (use-package php-mode
   :hook
   (php-mode . lsp-deffered)
@@ -625,6 +1021,14 @@
 (add-to-list 'auto-mode-alist '("\\.php\\'" . php-mode))
 (use-package phpunit)
 
+\end{verbatim}
+
+\subsection{Smerge}
+\label{sec:orgaf1ae1a}
+
+Merge make it easy with smerge-mode
+
+\begin{verbatim}
 (use-package hydra)
 (use-package smerge-mode
   :config
@@ -665,6 +1069,14 @@ _k_: down      _a_: combine       _q_: quit
      "gm"  '(scimax-smerge/body :which-key "Toggle smerge")
      )
 
+\end{verbatim}
+
+\subsection{Projectile}
+\label{sec:orged5d2f2}
+
+Project wide system management
+
+\begin{verbatim}
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -678,10 +1090,21 @@ _k_: down      _a_: combine       _q_: quit
      "fa" '(projectile-replace-regexp :which-key "Find Replace Project")
      "ft" '(projectile-find-test-file :which-key "Find Tests")
      "ff" '(projectile-find-file :which-key "Find File"))
+\end{verbatim}
 
+\subsection{VTerm}
+\label{sec:orge9ee7aa}
+
+Terminal emulator
+
+\begin{verbatim}
 (use-package vterm
     :ensure t)
+\end{verbatim}
 
+Open at bottom
+
+\begin{verbatim}
 (defun vterm-split-window-below ()
   (interactive)
   (vterm)
@@ -697,7 +1120,14 @@ _k_: down      _a_: combine       _q_: quit
 
 (neko/leader-keys
   "ot" '(vterm-toggle :which-key "Open Vterm"))
+\end{verbatim}
 
+\subsection{Magit}
+\label{sec:org11917c2}
+
+Git inside emacs!
+
+\begin{verbatim}
 (use-package magit
   :ensure t
   :bind ("C-x g" . magit-status)
@@ -711,9 +1141,25 @@ _k_: down      _a_: combine       _q_: quit
 (neko/leader-keys
     "g" '(:ignore t :which-key "Git")
     "gs" '(open-magit-in-vertical-split :which-key "Magit"))
+\end{verbatim}
 
+\subsection{Tests}
+\label{sec:org28c4825}
+\subsubsection{Jest}
+\label{sec:org73dbc93}
+
+Used for jest unit test TS/JS
+
+\begin{verbatim}
 (use-package jest)
+\end{verbatim}
 
+\subsection{Container}
+\label{sec:orgaba1bf8}
+
+Container Docker config
+
+\begin{verbatim}
 (use-package docker
   :ensure t)
 
@@ -722,39 +1168,72 @@ _k_: down      _a_: combine       _q_: quit
   "cd" '(docker-compose :which-key "Docker Compose")
   "ci" '(docker-images :which-key "Docker Images")
   )
+\end{verbatim}
 
+
+\begin{verbatim}
 (use-package dockerfile-mode)
+\end{verbatim}
 
+\subsubsection{Kubernetes}
+\label{sec:org0e22fc5}
+
+Kubernetes setups
+
+\begin{verbatim}
 (use-package kubernetes
   :ensure t
   :commands (kubernetes-overview)
   :config
   (setq kubernetes-poll-frequency 3600
-	kubernetes-redraw-frequency 3600))
+        kubernetes-redraw-frequency 3600))
+\end{verbatim}
 
+K8s Setup
+
+\begin{verbatim}
 (use-package k8s-mode
   :ensure t
   :hook (k8s-mode . yas-minor-mode))
+\end{verbatim}
 
+\subsection{Blamer}
+\label{sec:org0c063db}
+
+Blamer
+
+\begin{verbatim}
 (use-package blamer
   :ensure t
   :bind (("s-i" . blamer-show-commit-info)
-	 ("C-c i" . blamer-show-posframe-commit-info))
+         ("C-c i" . blamer-show-posframe-commit-info))
   :defer 20
   :custom
   (blamer-idle-time 0.3)
   (blamer-min-offset 70)
   :custom-face
   (blamer-face ((t :foreground "#7a88cf"
-		   :background nil
-		   :height 100
-		   :italic t))))
+                   :background nil
+                   :height 100
+                   :italic t))))
+\end{verbatim}
 
+\section{Writing}
+\label{sec:orgb9142b1}
+
+All of writing stuff
+
+\subsection{Org Mode}
+\label{sec:orgfc55c86}
+
+Org mode style writing
+
+\begin{verbatim}
 (use-package org
   :config
   (setq org-ellipsis " ...")
   (setq org-agenda-files
-	'("~/Orgs/")))
+        '("~/Orgs/")))
 
 (defun nolinum ()
   (global-display-line-numbers-mode 0))
@@ -765,42 +1244,53 @@ _k_: down      _a_: combine       _q_: quit
 
 
 (setq org-capture-templates '(("t" "Todo [inbox]" entry
-			       (file+headline "~/Orgs/inbox.org" "Tasks")
-			       "* TODO %i%?")
-			      ("T" "Tickler" entry
-			       (file+headline "~/Orgs/tickler.org" "Tickler")
-			       "* %i%? \n %U")
-			      ("b" "Braindump" entry
-			       (file+headline "~/Orgs/braindump.org" "Braindump")
-			       "* %? \n")))
+                               (file+headline "~/Orgs/inbox.org" "Tasks")
+                               "* TODO %i%?")
+                              ("T" "Tickler" entry
+                               (file+headline "~/Orgs/tickler.org" "Tickler")
+                               "* %i%? \n %U")
+                              ("b" "Braindump" entry
+                               (file+headline "~/Orgs/braindump.org" "Braindump")
+                               "* %? \n")))
 
 (setq org-refile-targets '(("~/Orgs/agenda.org" :maxlevel . 3)
-			   ("~/Orgs/someday.org" :level . 1)
-			   ("~/Orgs/tickler.org" :maxlevel . 2)))
+                           ("~/Orgs/someday.org" :level . 1)
+                           ("~/Orgs/tickler.org" :maxlevel . 2)))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "WAITING(n)" "|" "DONE(d)" "CANCEL(c)")))
 
+\end{verbatim}
+
+\begin{verbatim}
 (setq org-agenda-breadcrumbs-separator " ❱ "
       org-agenda-current-time-string "⏰ ┈┈┈┈┈┈┈┈┈┈┈ now"
       org-agenda-time-grid '((weekly today require-timed)
-			     (800 1000 1200 1400 1600 1800 2000)
-			     "---" "┈┈┈┈┈┈┈┈┈┈┈┈┈")
+                             (800 1000 1200 1400 1600 1800 2000)
+                             "---" "┈┈┈┈┈┈┈┈┈┈┈┈┈")
       org-agenda-prefix-format '((agenda . "%i %-12:c%?-12t%b% s")
-				 (todo . " %i %-12:c")
-				 (tags . " %i %-12:c")
-				 (search . " %i %-12:c")))
+                                 (todo . " %i %-12:c")
+                                 (tags . " %i %-12:c")
+                                 (search . " %i %-12:c")))
 
 (setq org-agenda-format-date (lambda (date) (concat "\n" (make-string (window-width) 9472)
-						    "\n"
-						    (org-agenda-format-date-aligned date))))
+                                                    "\n"
+                                                    (org-agenda-format-date-aligned date))))
 (setq org-cycle-separator-lines 2)
 (setq org-agenda-category-icon-alist
       `(("Work" ,(list (all-the-icons-faicon "cogs")) nil nil :ascent center)
-	("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
-	("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
-	("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
+        ("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
+        ("Calendar" ,(list (all-the-icons-faicon "calendar")) nil nil :ascent center)
+        ("Reading" ,(list (all-the-icons-faicon "book")) nil nil :ascent center)))
+\end{verbatim}
 
+
+\subsection{Org babel}
+\label{sec:org3712a69}
+
+Execute script inside org \texttt{\#+begin\_src lang}
+
+\begin{verbatim}
 (setq org-babel-python-command "python3")
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -810,51 +1300,95 @@ _k_: down      _a_: combine       _q_: quit
    (latex . t)
    (calc . t)
    ))
+\end{verbatim}
 
+\subsection{Org bullet}
+\label{sec:orga996812}
+
+Beautify bulletpoint
+
+\begin{verbatim}
 (use-package org-bullets
   :after org
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+\end{verbatim}
 
+\subsection{Org save tangle}
+\label{sec:orgb9c27e6}
+
+Auto tangle if saved
+
+\begin{verbatim}
 (defun neko/org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
-		      (expand-file-name "~/.emacs.d/README.org"))
+                      (expand-file-name "~/.emacs.d/README.org"))
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'neko/org-babel-tangle-config)))
+\end{verbatim}
 
+\subsection{Calfw}
+\label{sec:orge6ea25c}
+
+Beautiful calendar
+
+\begin{verbatim}
 (use-package calfw :ensure t
   :config
   (setq cfw:face-item-separator-color nil
-	cfw:render-line-breaker 'cfw:render-line-breaker-none
-	cfw:fchar-junction ?╋
-	cfw:fchar-vertical-line ?┃
-	cfw:fchar-horizontal-line ?━
-	cfw:fchar-left-junction ?┣
-	cfw:fchar-right-junction ?┫
-	cfw:fchar-top-junction ?┯
-	cfw:fchar-top-left-corner ?┏
-	cfw:fchar-top-right-corner ?┓)
+        cfw:render-line-breaker 'cfw:render-line-breaker-none
+        cfw:fchar-junction ?╋
+        cfw:fchar-vertical-line ?┃
+        cfw:fchar-horizontal-line ?━
+        cfw:fchar-left-junction ?┣
+        cfw:fchar-right-junction ?┫
+        cfw:fchar-top-junction ?┯
+        cfw:fchar-top-left-corner ?┏
+        cfw:fchar-top-right-corner ?┓)
   )
 (use-package calfw-org :ensure t
   :commands (cfw:open-org-calendar
-	     cfw:org-create-source
-	     cfw:org-create-file-source
-	     cfw:open-org-calendar-withkevin)
+             cfw:org-create-source
+             cfw:org-create-file-source
+             cfw:open-org-calendar-withkevin)
   )
 (require 'calfw-org)
+\end{verbatim}
 
+\subsection{\LaTeX{}}
+\label{sec:org18af6c3}
+
+All latex retaled writing stuffs
+
+\begin{verbatim}
 (use-package org-fragtog)
+\end{verbatim}
 
+\begin{verbatim}
 (add-hook 'org-mode-hook
-	   'org-fragtog-mode)
+           'org-fragtog-mode)
+\end{verbatim}
 
-(setq org-startup-with-latex-preview t
-      org-format-latex-options (plist-put
-				org-format-latex-options :scale 3.0))
+\begin{center}
+\begin{tabular}{lllllrlllllrll}
+:foreground & default & :background & default & :scale & 3.0 & :html-foreground & Black & :html-background & Transparent & :html-scale & 1.0 & :matchers & (begin \$1 \$ \$\$ $\backslash$( $\backslash$[)\\[0pt]
+\end{tabular}
+\end{center}
 
+\section{Workspace}
+\label{sec:orgd6b4324}
+
+Workspaces related configuration
+
+\subsection{Prespective-el}
+\label{sec:org5a9135f}
+
+Prespective for each workspaces
+
+\begin{verbatim}
 (use-package perspective
   :bind
   ("C-x k" . persp-kill-buffer*)         ; or use a nicer switcher, see below
@@ -876,6 +1410,20 @@ _k_: down      _a_: combine       _q_: quit
   "[" '(persp-prev :which-key "Prev perspective")
   )
 
+\end{verbatim}
+
+\section{Keybinding}
+\label{sec:orgc5b14b9}
+
+\subsection{Basic Keybinding}
+\label{sec:orgca81897}
+
+\subsubsection{Window keybind}
+\label{sec:org343a4dc}
+
+Window movement and management keybind
+
+\begin{verbatim}
 (defun reload-dotemacs ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
@@ -892,8 +1440,16 @@ _k_: down      _a_: combine       _q_: quit
   "wv" '(evil-window-vsplit :which-key "Vsplit")
   "wq" '(delete-window :which-key "Quit")
   "wr" '(reload-dotemacs :which-key "Reload")
-  "wb" '(switch-to-buffer :which-key "Switch Buffer"))
+  "wb" '(switch-to-buffer :which-key "Switch Buffer")) 
 
+\end{verbatim}
+
+\subsubsection{General keybind}
+\label{sec:org60c61c7}
+
+Generic wide system keybinding
+
+\begin{verbatim}
 (neko/leader-keys
   ";" '(helm-M-x :which-key "Meta")
   "/" '(comment-region :which-key "Comment region")
@@ -903,11 +1459,23 @@ _k_: down      _a_: combine       _q_: quit
   "bk" '(kill-buffer :which-key "Kill buffer")
   "qq" '(kill-buffer-and-window :which-key "Kill buffer")
   "ba" '(kill-other-buffers :which-key "Kill other buffer except this"))
+\end{verbatim}
 
+\subsubsection{Open keybind}
+\label{sec:orga400886}
+
+\begin{verbatim}
 (neko/leader-keys
   "o" '(:ignore t :which-key "Open")
   "oa" '(org-agenda :which-key "Org Agenda")
   "oc" '(cfw:open-org-calendar :which-key "Calendar")
   "oe" '(neotree :which-key "Neotree")
   "od" '(dashboard-open :which-key "Dashboard")
-  "oD" '(dired :which-key "Dired"))
+  "oD" '(dired :which-key "Dired")) 
+\end{verbatim}
+
+
+
+If \(a^2=b\) and \(b=2\), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+\end{document}

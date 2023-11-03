@@ -1,10 +1,11 @@
 #+AUTHOR: Pramudya Arya Wicaksana
 #+TITLE: Vanilla Emacs configuration
 #+EMAIL: pram.aryawcksn@gmail.com
-#+SUBTITLE: Config for GO and Flutter development, also note taking!
+#+SUBTITLE: Config for GO, Java and Flutter development, also note taking!
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+STARTUP: fold
 #+STARTUP: inlineimages
+#+LATEX_HEADER: \onehalfspacing
 
 * Making emacs work for me
 
@@ -19,9 +20,12 @@ This config working on version emacs24
 #+begin_src emacs-lisp
   (setq byte-compile-warnings '(cl-functions))
   (global-auto-revert-mode t)
+  (setq-default cursor-type 'bar) 
+
 #+end_src
 
 #+RESULTS:
+: bar
 
 * Package Manager
 #+begin_src emacs-lisp :exports code
@@ -81,28 +85,20 @@ Shell configuration using ZSH
 : relative
 
 ** Theme
-#+begin_src emacs-lisp
-  (use-package dracula-theme)
-#+end_src
 
 #+begin_src emacs-lisp
-  (use-package doom-themes
-    :ensure t
-    :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-tokyo-night t))
+  (use-package atom-one-dark-theme)
+  (load-theme 'atom-one-dark t)
+  (if (display-graphic-p)
+      ;; Code for graphical frames
+      (load-theme 'atom-one-dark t)
+    ;; Code for terminal frames
+    (load-theme 'atom-one-dark t))
+
 #+end_src
 
 #+RESULTS:
 : t
-
-#+begin_src emacs-lisp
-  (use-package atom-one-dark-theme)
-#+end_src
-
-#+RESULTS:
 
 ** Font
 
@@ -168,7 +164,6 @@ Show programming lignature
        (add-to-list 'image-types 'svg)
        (tool-bar-mode -1)
        (menu-bar-mode -1)
-       (load-theme 'atom-one-dark t)
        (scroll-bar-mode 1))
    #+END_SRC
 
@@ -178,16 +173,11 @@ Show programming lignature
    #+BEGIN_SRC emacs-lisp
      (when (not (window-system))
        (tool-bar-mode -1)
+       (load-theme 'atom-one-dark t)
        (menu-bar-mode -1))
    #+END_SRC
 
-   #+begin_src emacs-lisp
-     (if (daemonp)
-       (load-theme 'atom-one-dark t))
-   #+end_src
-
-   #+RESULTS:
-   : t
+   #+RESULTS: look-and-feel
 
 ** Basic functionality
 
@@ -209,8 +199,16 @@ Show programming lignature
    #+RESULTS:
    : t
 
-** Font
 ** Icons
+
+Language and all other icons pack
+
+#+begin_src emacs-lisp
+  (use-package all-the-icons)
+#+end_src
+
+#+RESULTS:
+
 ** Dashboard
 
 Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shortcuts!
@@ -239,16 +237,6 @@ Startup page using Fuyuko Mayuzumi image as banner and show bunch of useful shor
 #+RESULTS:
 | lambda | nil | (get-buffer *dashboard*) |
 
-
-Language and all other icons pack
-
-#+begin_src emacs-lisp
-  (use-package all-the-icons
-    :ensure t)
-#+end_src
-
-#+RESULTS:
-
 ** Modeline
 
 Modeline using vanilla emacs with only limited info that i really need
@@ -257,8 +245,7 @@ Modeline using vanilla emacs with only limited info that i really need
 
   (setq display-battery-mode t)
   (setq display-time-mode t)
-  (setq mode-line-percent-position '(-3 "%p"))
-
+  (setq display-time t)
   (setq-default mode-line-format
 		'(
 		  "有"
@@ -282,11 +269,10 @@ Modeline using vanilla emacs with only limited info that i really need
 		  mode-line-misc-info
 		  mode-line-end-spaces
 		  ))
-  (setq mode-line-position (list "(%l,%c)"))
 #+end_src
 
 #+RESULTS:
-| (%l,%c) |
+| 有 | %e | mode-line-front-space | mode-line-frame-identification | mode-line-buffer-identification |   | mode-line-position | evil-mode-line-tag | (:eval (if vc-mode (let* ((noback (replace-regexp-in-string (format ^ %s (vc-backend buffer-file-name))   vc-mode)) (face (cond ((string-match ^ - noback) 'mode-line-vc) ((string-match ^ [:@] noback) 'mode-line-vc-edit) ((string-match ^ [!\?] noback) 'mode-line-vc-modified)))) (format  %s (substring noback 2))))) |   | (:eval (when (and (bound-and-true-p lsp-mode) (lsp--client-servers)) (format LSP[%s] (mapconcat 'lsp--client-server-id (lsp--client-servers) , )))) | mode-line-misc-info | mode-line-end-spaces |
 
 ** Neotree (Filetree)
 
@@ -321,7 +307,7 @@ Tab bar configurations
   (setq
    backup-by-copying t      ; don't clobber symlinks
    backup-directory-alist
-    '(("." . "~/.saves/"))    ; don't litter my fs tree
+   '(("." . "~/.saves/"))    ; don't litter my fs tree
    delete-old-versions t
    kept-new-versions 6
    kept-old-versions 2
@@ -559,9 +545,6 @@ LSP backend for every language i use
     :init
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
-    (setq lsp-inlay-hints-enable t
-	  lsp-inlay-hints-prefix " » "
-	  lsp-inlay-hints-highlight   "#6B8E23")
     (setq lsp-lens-enable t)
     (setq lsp-ui-sideline-enable t)
 
@@ -577,7 +560,6 @@ LSP backend for every language i use
     (lsp-enable-xref t)
     (lsp-headerline-breadcrumb-enable t)
     (lsp-idle-delay 0.4)
-    (lsp-inlay-hint-enable t)
     (lsp-lens-enable t)
     (lsp-modeline-diagnostics-enable t)
     (lsp-semantic-tokens-apply-modifiers t)
@@ -586,11 +568,7 @@ LSP backend for every language i use
     (lsp-signature-auto-activate t)
     (lsp-signature-render-documentation t)
 
-
-
-    :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-	   ;;(XXX-mode . lsp)
-	   ;; if you want which-key integration
+    :hook (
 	   (lsp-mode . lsp-enable-which-key-integration))
     :commands lsp)
 
@@ -915,8 +893,6 @@ Typescript mode
   (use-package typescript-mode
     :after tree-sitter
     :config
-    ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
-    ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
     (define-derived-mode typescriptreact-mode typescript-mode
       "TypeScript TSX")
 
@@ -953,12 +929,26 @@ Java configuration for Spring boot etc
   (add-to-list 'tree-sitter-major-mode-language-alist
 	       '(java-mode . java))
 
-  ;; Hook Tree-sitter mode into your major modes
   (add-hook 'java-mode-hook #'tree-sitter-hl-mode)
 #+end_src
 
 #+RESULTS:
-| tree-sitter-hl-mode | (lambda nil (lsp-java-boot-lens-mode)) | lsp-deferred | flycheck-mode | company-mode | lsp-java-boot-lens-mode | lsp |
+| lsp-deffered | tree-sitter-hl-mode | lsp-java-boot-lens-mode | lsp-deferred | flycheck-mode | company-mode |
+
+*** Scala
+Scala
+#+begin_src emacs-lisp
+  (use-package scala-mode
+    :interpreter ("scala" . scala-mode)
+    :hook
+    ((scala-mode . company-mode)
+     (scala-mode . lsp-deferred))
+    )
+  (use-package lsp-metals)
+
+#+end_src
+
+#+RESULTS:
 
 *** Yaml
 #+begin_src emacs-lisp
@@ -1043,14 +1033,6 @@ Rust setup
     :config
     (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
-#+end_src
-
-#+RESULTS:
-: t
-
-Rust treesitter
-
-#+begin_src emacs-lisp
   (add-to-list 'tree-sitter-major-mode-language-alist
 	       '(rust-mode . rust))
 
@@ -1059,7 +1041,7 @@ Rust treesitter
 #+end_src
 
 #+RESULTS:
-| tree-sitter-hl-mode | (lambda nil (prettify-symbols-mode)) | (lambda nil (setq indent-tabs-mode nil)) | rust-maybe-initialize-buffer-project | cargo-minor-mode | lsp-deferred | flycheck-mode |
+| tree-sitter-hl-mode | cargo-minor-mode | lsp-deferred | company-mode |
 
 *** Web
 Web related languages, PHP, etc
@@ -1281,9 +1263,7 @@ Blamer
     (blamer-face ((t :foreground "#7a88cf"
 		     :background nil
 		     :height 100
-		     :italic t)))
-    :config
-    (global-blamer-mode 1))
+		     :italic t))))
 #+end_src
 
 #+RESULTS:
